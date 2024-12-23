@@ -6,8 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import './Register.scss'; // Import the CSS file for styles
 
 const Register = () => {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
+    const { formData, setFormData } = useState({ username: '', email: '', password: '', confirmPassword: '' })
     const [errorMessage, setErrorMessage] = useState('');
     const navigate = useNavigate()
 
@@ -44,41 +43,68 @@ const Register = () => {
 
     return (
         <div className="register-container">
-            <div className='back-button' >&larr;</div>
-
-            <img className='img-1' src={traingleShape} alt="" />
-            <img className='img-2' src={semicircle} alt="" />
-            <img className='img-3' src={semicircle2} alt="" />
-            <form onSubmit={handleSubmit}>
-                <div className="form-group email-field">
-                    <label htmlFor="username">Email</label>
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        value={username}
-                        placeholder='Enter your email'
-                        onChange={(e) => setUsername(e.target.value)}
-                        required
-                    />
+            <div className='form-container' >
+                <div className='back-button' >&larr;</div>
+                <img className='img-1' src={traingleShape} alt="" />
+                <img className='img-2' src={semicircle} alt="" />
+                <img className='img-3' src={semicircle2} alt="" />
+                <div className='form-fields' >
+                    <form className='relative' onSubmit={handleSubmit}>
+                        <div className="form-group email-field" >
+                            <label htmlFor="username">Username</label>
+                            <input
+                                type="text"
+                                id="username"
+                                name="username"
+                                value={formData?.username}
+                                placeholder='Enter your email'
+                                onChange={(e) => setUsername(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="form-group email-field">
+                            <label htmlFor="email">Email</label>
+                            <input
+                                type="text"
+                                id="email"
+                                name="email"
+                                value={formData?.email}
+                                placeholder='Enter your email'
+                                onChange={(e) => setUsername(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="form-group password">
+                            <label htmlFor="password">Password</label>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                value={formData?.password}
+                                placeholder='*******'
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="password">Confirm Password</label>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                value={formData?.confirmPassword}
+                                placeholder='*******'
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="form-group btn" >
+                            <button type="submit">Sign Up</button>
+                        </div>
+                        <div className='form-group register-btn' >Already have an account? <span onClick={() => navigate('/login')} >Login</span></div>
+                    </form>
                 </div>
-                <div className="form-group">
-                    <label htmlFor="password">Password</label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        value={password}
-                        placeholder='*******'
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="form-group btn" >
-                    <button type="submit">Log In</button>
-                </div>
-                <div className='form-group register-btn' >Don’t have an account? <span onClick={() => navigate('/register')} >Register now</span></div>
-            </form>
+            </div>
         </div>
     );
 };

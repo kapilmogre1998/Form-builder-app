@@ -44,41 +44,44 @@ const LogIn = () => {
 
     return (
         <div className="login-container">
-            <div className='back-button' onClick={() => navigate('/')} >&larr;</div>
-
-            <img className='img-1' src={traingleShape} alt="" />
-            <img className='img-2' src={semicircle} alt="" />
-            <img className='img-3' src={semicircle2} alt="" />
-            <form className='login-form-container' onSubmit={handleSubmit}>
-                <div className="form-group email-field">
-                    <label htmlFor="username">Email</label>
-                    <input
-                        type="text"
-                        id="username"
-                        name="username"
-                        value={username}
-                        placeholder='Enter your email'
-                        onChange={(e) => setUsername(e.target.value)}
-                        required
-                    />
+            <div className='form-container' >
+                <div className='back-button' onClick={() => navigate('/')} >&larr;</div>
+                <img className='img-1' src={traingleShape} alt="" />
+                <img className='img-2' src={semicircle} alt="" />
+                <img className='img-3' src={semicircle2} alt="" />
+                <div className='form-fields' >
+                    <form className='login-form-container' onSubmit={handleSubmit}>
+                        <div className="form-group email-field">
+                            <label htmlFor="username">Email</label>
+                            <input
+                                type="text"
+                                id="username"
+                                name="username"
+                                value={username}
+                                placeholder='Enter your email'
+                                onChange={(e) => setUsername(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="form-group">
+                            <label htmlFor="password">Password</label>
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                value={password}
+                                placeholder='*******'
+                                onChange={(e) => setPassword(e.target.value)}
+                                required
+                            />
+                        </div>
+                        <div className="form-group btn" >
+                            <button type="submit">Log In</button>
+                        </div>
+                        <div className='form-group register-btn' >Don’t have an account? <span onClick={() => navigate('/register')} >Register now</span></div>
+                    </form>
                 </div>
-                <div className="form-group">
-                    <label htmlFor="password">Password</label>
-                    <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        value={password}
-                        placeholder='*******'
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
-                <div className="form-group btn" >
-                    <button type="submit">Log In</button>
-                </div>
-                <div className='form-group register-btn' >Don’t have an account? <span onClick={() => navigate('/register')} >Register now</span></div>
-            </form>
+            </div>
         </div>
     );
 };

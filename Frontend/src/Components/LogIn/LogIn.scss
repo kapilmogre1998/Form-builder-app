@@ -6,6 +6,20 @@
     color: #FFFFFF80;
     display: grid;
     width: 100%;
+
+    .form-fields{
+        display: flex;
+        flex-direction: column;
+        height: 90vh;
+        align-items: center;
+        justify-content: center;
+        width: 1005;
+
+        & form{
+            width: 100%;
+            position: relative;
+        }
+    }
     
     .back-button{
         font-size: 20px;
@@ -19,6 +33,7 @@
         position: absolute;
         width: 20%;
         left: 0px;
+        top: 20%
     }
 
     .img-2{
@@ -29,7 +44,7 @@
     .img-3{
         position: absolute;
         bottom: 0px;
-        right: 30%
+        right: 18%
     }
     
 

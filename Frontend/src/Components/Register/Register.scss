@@ -1,21 +1,41 @@
 .register-container {
     background-color: #18181B;
-    padding: 20px;
     height: 100vh;
     position: relative;
     color: #FFFFFF80;
     display: grid;
     width: 100%;
     
+    .relative{
+        position: relative;
+    }
+
     .back-button{
         font-size: 20px;
         color: white;
+        position: absolute;
+        left: 40px;
+        top: 20px;
+    }
+
+    .form-fields{
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        align-items: center;
+        justify-content: center;
+        width: 1005;
+
+        & form{
+            width: 100%;
+        }
     }
     
     .img-1{
         position: absolute;
         width: 20%;
         left: 0px;
+        top: 20%;
     }
 
     .img-2{
@@ -26,7 +46,7 @@
     .img-3{
         position: absolute;
         bottom: 0px;
-        right: 30%
+        right: 18%
     }
     
 
@@ -61,6 +81,10 @@
         margin: auto;
 
         &.email-field{
+            margin-bottom: 28px;
+        }
+
+        &.password{
             margin-bottom: 28px;
         }
     }
