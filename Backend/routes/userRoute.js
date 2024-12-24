@@ -25,7 +25,7 @@ router.post('/register', async (req, res) => {
         res.status(200).json({message:'User created successfully'})
     } catch (error) {
         console.log(error)
-        res.status(500).json({message:error.message})
+        res.status(500).json({message: 'Something went wrong'})
     }
 })
 
@@ -34,7 +34,7 @@ router.post('/login',async(req,res)=> {
         const {email,password} = req.body;
         const userExists = await User.findOne({ email })
         if(!userExists){
-            return res.status(400).json({ message: "Invalid Credentials" })
+            return res.status(400).json({ message: "User does not exist" })
         }
 
         const isMatched = await bcrypt.compare(password,userExists.password)
@@ -46,10 +46,11 @@ router.post('/login',async(req,res)=> {
         const token = jwt.sign({_id:userExists._id},process.env.JWT_SECRET_KEY)
 
         if(isMatched && token){
-            res.status(200).json({token,message:'Login successful'})
+            res.status(200).json({token, userId: userExists._id, userName: userExists.username, email: userExists.email ,message:'Login successful', })
         }
     } catch (error) {
         console.log(error);
+        res.status(500).json({message: 'Something went wrong'})
     }
 })
 

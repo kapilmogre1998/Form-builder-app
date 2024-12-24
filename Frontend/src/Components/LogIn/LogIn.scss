@@ -1,11 +1,9 @@
 .login-container {
     background-color: #18181B;
-    padding: 20px;
     height: 100vh;
-    position: relative;
     color: #FFFFFF80;
-    display: grid;
     width: 100%;
+    overflow: auto;
 
     .form-fields{
         display: flex;
@@ -13,7 +11,7 @@
         height: 90vh;
         align-items: center;
         justify-content: center;
-        width: 1005;
+        width: 100%;
 
         & form{
             width: 100%;
