@@ -1,47 +1,46 @@
-.register-container {
+.login-container {
     background-color: #18181B;
     height: 100vh;
-    position: relative;
     color: #FFFFFF80;
-    display: grid;
     width: 100%;
-    
-    .relative{
-        position: relative;
-    }
-
-    .back-button{
-        font-size: 20px;
-        color: white;
-        position: absolute;
-        left: 40px;
-        top: 20px;
-    }
+    overflow: auto;
+    position: relative;
 
     .form-fields{
         display: flex;
         flex-direction: column;
-        height: 100vh;
+        height: 90vh;
         align-items: center;
         justify-content: center;
-        width: 1005;
+        width: 100%;
 
         & form{
             width: 100%;
+            position: relative;
         }
+    }
+    
+    .back-button{
+        font-size: 20px;
+        color: white;
+        cursor: pointer;
+        position: absolute;
+        z-index: 1000;
+        left: 30px;
+        top: 10px;
     }
     
     .img-1{
         position: absolute;
         width: 20%;
         left: 0px;
-        top: 20%;
+        top: 20%
     }
 
     .img-2{
         position: absolute;
         right: 0px;
-        top: 20%;
+        top: 10%;
     }
 
     .img-3{
@@ -50,18 +49,8 @@
         right: 18%
     }
     
-
-    .submit-btn{
-        width: 28%;
-        margin: auto;
-        text-align: center;
-        .btn{
-            text-align: center;
-        }
-    }
-
     .form-group.btn{
-        margin-top: 38px;
+        margin-top: 28px;
         
         & > button{
             width: 100%;
@@ -73,20 +62,18 @@
             box-shadow: 0px 4px 10px 0px #E9444B40;
             color: white;
             cursor: pointer;
+            font-weight: bold;
+            font-size: 15px;
         }
     }
 
     .form-group {
+        width: 30%;
         margin-bottom: 15px;
-        width: 25%;
         margin: auto;
 
-        &.email-field{
-            margin-bottom: 28px;
-        }
-
-        &.password{
-            margin-bottom: 28px;
+        &.error{
+            border: 1px solid red;
         }
     }
     
@@ -109,7 +96,6 @@
     
     .form-group input:focus {
         outline: none;
-        border-color: #66afe9;
     }
 
     .register-btn{
@@ -121,6 +107,12 @@
             color: #2478FE;
             cursor: pointer;
         }
+    }
+
+    .err-msg{
+        color: red;
+        font-size: 14px;
+        height: 21px;
     }
 }
 

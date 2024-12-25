@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import traingleShape from '../../assets/traingle-shape.png';
 import semicircleShape from '../../assets/semicircle-shape.png';
 import dummyImage from '../../assets/dummy-flow.png';
@@ -7,7 +7,14 @@ import './HomePage.scss'
 
 const HomePage = () => {
     const navigate = useNavigate();
-
+    
+    useEffect(() => {
+        const token = localStorage.getItem('token')
+        if(token){
+            navigate('/form-dashboard')
+        }
+    },[])
+    
     return (
         <div className='home-page-container' >
             <header className='home-page-header' >

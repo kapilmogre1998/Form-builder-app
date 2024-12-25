@@ -12,20 +12,33 @@ router.post('/register', async (req, res) => {
         const isEmailExists = await User.findOne({email});
 
         if(isEmailExists){
-            return res.status(400).json({message: 'Email already exists'})
+            return res.status(400).json({msg: 'Email already exists'})
         }
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password,salt);
 
-        await User.create({
+        const userData = await User.create({
             username,
             email,
             password:hashedPassword
         });
-        res.status(200).json({message:'User created successfully'})
+
+        const token = jwt.sign({_id:userData._id},process.env.JWT_SECRET_KEY)
+
+        if(token){
+            res.status(200).json({
+                token, 
+                userData: {
+                    userId: userData._id, 
+                    userName: userData.username, 
+                    email: userData.email,
+                },
+                msg:'Signup successful'
+            })
+        }
     } catch (error) {
         console.log(error)
-        res.status(500).json({message: 'Something went wrong'})
+        res.status(500).json({msg: 'Something went wrong'})
     }
 })
 
@@ -34,23 +47,31 @@ router.post('/login',async(req,res)=> {
         const {email,password} = req.body;
         const userExists = await User.findOne({ email })
         if(!userExists){
-            return res.status(400).json({ message: "User does not exist" })
+            return res.status(400).json({ msg: "User does not exist" })
         }
 
         const isMatched = await bcrypt.compare(password,userExists.password)
 
         if (!isMatched) {
-            return res.status(400).json({ message: "Invalid Credentials" })
+            return res.status(400).json({ msg: "Invalid Credentials" })
         }
 
         const token = jwt.sign({_id:userExists._id},process.env.JWT_SECRET_KEY)
 
         if(isMatched && token){
-            res.status(200).json({token, userId: userExists._id, userName: userExists.username, email: userExists.email ,message:'Login successful', })
+            res.status(200).json({
+                token, 
+                userData: {
+                    userId: userExists._id, 
+                    userName: userExists.username, 
+                    email: userExists.email ,
+                },
+                msg:'Login successful'
+            })
         }
     } catch (error) {
         console.log(error);
-        res.status(500).json({message: 'Something went wrong'})
+        res.status(500).json({msg: 'Something went wrong'})
     }
 })
 
