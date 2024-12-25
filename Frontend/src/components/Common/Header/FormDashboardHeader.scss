@@ -1,0 +1,42 @@
+.header-container {
+    display: flex;
+    justify-content: center;
+    position: relative;
+    align-items: center;
+
+    &>select {
+        outline: none;
+        background-color: #1D1D1D;
+        color: white;
+        padding: 2px;
+        width: 140px;
+        border-radius: 4px;
+        padding: 4px 2px;
+        display: flex;
+        justify-content: center;
+    }
+    .action-buttons{
+        position: absolute;
+        right: 4%;
+        display: flex;
+        gap: 4rem;
+        font-size: 12px;
+        align-items: center;
+
+        .switch-buttons{
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .share-btn {
+            color: white;
+            background-color: #1A5FFF;
+            outline: none;
+            border: 0px;
+            padding: 6px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+    }
+}

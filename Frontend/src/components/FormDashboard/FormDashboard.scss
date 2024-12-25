@@ -1,0 +1,87 @@
+.form-dashboard-container {
+    background-color: #18181B;
+    min-height: 100vh;
+
+    // @mixin light-mode {
+    //     background-color: #1A5FFF;
+    //     color: white;
+    // }
+    
+    &.light-mode {
+        background-color: white;
+        color: #1A5FFF;
+    }
+
+    &>header {
+        &.light-mode {
+            background-color: white;
+            color: #1A5FFF;
+        }
+
+        padding: 12px 0px;
+        border-bottom: 1px solid #FFFFFF29
+    }
+
+    .create-folder-container{
+        width: 70%;
+        margin: auto;
+        padding-top: 32px;
+
+        .folder-list{
+            display: flex;
+            gap: 1rem;
+    
+            .folder{
+                background-color: #2A2A2D;
+                padding: 4px 8px;
+                border-radius: 4px;
+                display: flex;
+                gap: 0.25rem;
+                font-size: 14px;
+                cursor: pointer;
+
+                &.active{
+                    background-color: white;
+                    color: #18181B;
+                }
+            }
+        }
+    }
+
+    .files{
+        display: flex;
+        gap: 1rem;
+        padding-top: 20px;
+
+        .file{
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 2rem;
+            font-size: 14px;
+            height: 200px;
+            width: 170px;
+            border-radius: 6px;
+            cursor: pointer;
+            background-color: #8C8C8D;
+            position: relative;
+
+            .plus-icon{
+                font-size: 32px;
+            }
+
+            .file-delete-icon{
+                position: absolute;
+                top: -14px;
+                right: -4px;
+                font-size: 20px;
+            }
+        }
+
+        .file:nth-child(1){
+            background-color: #1A5FFF;
+        }
+    }
+
+}

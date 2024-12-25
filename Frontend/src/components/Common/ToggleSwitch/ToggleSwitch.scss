@@ -1,0 +1,48 @@
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 16px;
+    
+    .toggle-switch-checkbox {
+      display: none;
+    }
+    
+    .toggle-switch-label {
+      display: block;
+      background-color: #1A5FFF;
+      border-radius: 20px;
+      cursor: pointer;
+      position: relative;
+      height: 100%;
+      width: 100%;
+    }
+    
+    .toggle-switch-inner {
+      display: block;
+      height: 100%;
+      border-radius: 20px;
+      background-color: #1A5FFF;
+      transition: margin 0.3s ease-in-out;
+
+      &.light-mode{
+        background-color: grey;
+      }
+    }
+    
+    .toggle-switch-switch {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 16px;
+      height: 16px;
+      border-radius: 20px;
+      background-color: white;
+      transition: left 0.3s ease-in-out;
+    }
+    
+    .toggle-switch-checkbox:checked + .toggle-switch-label .toggle-switch-switch {
+      left: 60%;
+    }
+  }
+  

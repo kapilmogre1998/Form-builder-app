@@ -1,42 +1,47 @@
-.login-container {
+.register-container {
     background-color: #18181B;
     height: 100vh;
+    position: relative;
     color: #FFFFFF80;
+    display: grid;
     width: 100%;
-    overflow: auto;
+    
+    .relative{
+        position: relative;
+    }
+
+    .back-button{
+        font-size: 20px;
+        color: white;
+        position: absolute;
+        left: 40px;
+        top: 20px;
+    }
 
     .form-fields{
         display: flex;
         flex-direction: column;
-        height: 90vh;
+        height: 100vh;
         align-items: center;
         justify-content: center;
         width: 100%;
 
         & form{
             width: 100%;
-            position: relative;
         }
-    }
-    
-    .back-button{
-        font-size: 20px;
-        color: white;
-        cursor: pointer;
-        position: relative;
-        z-index: 1000;
     }
     
     .img-1{
         position: absolute;
         width: 20%;
         left: 0px;
-        top: 20%
+        top: 20%;
     }
 
     .img-2{
         position: absolute;
         right: 0px;
+        top: 20%;
     }
 
     .img-3{
@@ -73,12 +78,8 @@
 
     .form-group {
         margin-bottom: 15px;
-        width: 25%;
+        width: 30%;
         margin: auto;
-
-        &.email-field{
-            margin-bottom: 28px;
-        }
     }
     
     .form-group label {
@@ -100,7 +101,6 @@
     
     .form-group input:focus {
         outline: none;
-        border-color: #66afe9;
     }
 
     .register-btn{
@@ -112,6 +112,12 @@
             color: #2478FE;
             cursor: pointer;
         }
+    }
+
+    .error-msg{
+        color: red;
+        height: 21px;
+        font-size: 14px;
     }
 }
 
