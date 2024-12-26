@@ -3,14 +3,22 @@ import { IoEyeOutline } from "react-icons/io5";
 import { BiHide } from "react-icons/bi";
 import { FaRegUser } from "react-icons/fa";
 import { LuLogOut } from "react-icons/lu";
+import { useNavigate } from 'react-router-dom';
+
 import './Settings.scss';
 
 const Settings = () => {
     const [formData, setFormData] = useState({ userName: '', email: '', oldPassword: '', newPassword: '' })
     const [hide, setHide] = useState({ emailHide: true, oldPasswordHide: true, newPasswordHide: true })
+    const navigate = useNavigate()
 
     const handleOnChange = (e) => {
         setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+    }
+
+    const handleLogout = () => {
+        localStorage.removeItem('token')
+        navigate('/')
     }
 
     return (
@@ -101,7 +109,7 @@ const Settings = () => {
                         <button type="submit">Update</button>
                     </div>
                 </form>
-                <div className='logout-btn' onClick={() => {}} ><LuLogOut /> Logout</div>
+                <div className='logout-btn' onClick={handleLogout} ><LuLogOut /> Logout</div>
             </div>
         </div>
     )

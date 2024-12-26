@@ -11,13 +11,14 @@
     z-index: 1000;
 
     .modal-content {
-        padding: 40px 20px;
-        width: 300px;
-        background-color: white;
-        color: black;
-        border-radius: 8px;
+        padding: 20px 20px;
+        width: 400px;
+        background-color: #18181B;
+        color: white;
+        border-radius: 20px;
         position: relative;
         animation: fade-in 0.3s linear;
+        border: 1px solid #47474A;
     }
 
     .close-btn {

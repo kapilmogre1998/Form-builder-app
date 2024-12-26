@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const fileSchema = new Schema({
-    fileName: {
+    formName: {
         type: String,
         required: true
     },
@@ -21,4 +21,4 @@ const fileSchema = new Schema({
     },
 })
 
-module.exports = mongoose.model("File", fileSchema);
+module.exports = mongoose.model("Form", fileSchema);

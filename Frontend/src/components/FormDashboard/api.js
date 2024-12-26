@@ -17,9 +17,17 @@ export const createNewFolderAPI = async (data) => {
     }
 }
 
-export const createNewFileAPI = async (data) => {
+export const createDeleteFolderAPI = async (data) => {
     try {
-        return await axios.post(`${API_URL}/api/create/file`, data)
+        return await axios.post(`${API_URL}/api/delete/folder`, data)
+    } catch (error) {
+       throw error;
+    }
+}
+
+export const createNewFormAPI = async (data) => {
+    try {
+        return await axios.post(`${API_URL}/api/create/form`, data)
     } catch (error) {
        throw error;
     }

@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const File = require('../schema/fileSchema');
+const Form = require('../schema/fileSchema');
 const Folder = require('../schema/folderSchema');
 
-router.post('/create/file', async (req, res) => {
+router.post('/create/form', async (req, res) => {
     try {
         const { name, folderId, userId } = req.body;
 
@@ -20,16 +20,16 @@ router.post('/create/file', async (req, res) => {
             folder = await Folder.create({ folderName: 'NO_FOLDER_PROVIDED', owner: userId });
         }
 
-        // Create the file
-        const file = await File.create({ fileName: name, folder: folder._id });
+        // Create the form
+        const form = await Form.create({ formName: name, folder: folder._id });
 
-        // If folder was created, add the file to the folder's files array
+        // If folder was created, add the form to the folder's files array
         if (!folderId) {
-            folder.files.push(file._id);
+            folder.files.push(form._id);
             await folder.save();
         }
 
-        res.status(200).json({ file, folder });
+        res.status(200).json({ form, folder });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

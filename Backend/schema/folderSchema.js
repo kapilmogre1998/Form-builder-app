@@ -11,8 +11,8 @@ const folderSchema = new Schema({
         ref: 'User',
         required: true
     },
-    files: [{
-        fileName: String,
+    forms: [{
+        formName: String,
         owner: {
             type: Schema.Types.ObjectId,
             ref: 'User'

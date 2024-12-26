@@ -2,10 +2,20 @@
     background-color: #18181B;
     min-height: 100vh;
 
-    // @mixin light-mode {
-    //     background-color: #1A5FFF;
-    //     color: white;
-    // }
+    .text-center{
+        text-align: center;
+        margin-bottom: 14px;
+    }
+
+    .delete{
+        color: red;
+        cursor: pointer;
+    }
+
+    .flex{
+        display: flex;
+        align-items: center;
+    }
     
     &.light-mode {
         background-color: white;
@@ -36,9 +46,11 @@
                 padding: 4px 8px;
                 border-radius: 4px;
                 display: flex;
-                gap: 0.25rem;
+                gap: 0.5rem;
                 font-size: 14px;
                 cursor: pointer;
+                display: inline-flex;
+                align-items: center;
 
                 &.active{
                     background-color: white;
@@ -48,12 +60,12 @@
         }
     }
 
-    .files{
+    .forms{
         display: flex;
         gap: 1rem;
         padding-top: 20px;
 
-        .file{
+        .form{
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -71,17 +83,80 @@
                 font-size: 32px;
             }
 
-            .file-delete-icon{
+            .form-delete-icon{
                 position: absolute;
-                top: -14px;
-                right: -4px;
+                top: -13px;
+                right: -8px;
                 font-size: 20px;
             }
         }
 
-        .file:nth-child(1){
+        .form:nth-child(1){
             background-color: #1A5FFF;
+        }
+    }    
+
+    .action-buttons{
+        display: flex;
+        padding: 4px 0px;
+        align-items: center;
+        padding: 6px 0px 8px;
+
+        .btn{
+            outline: none;
+            border: 0px;
+            width: 50%;
+            color: #4B83FF;
+            background-color: transparent;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .divider{
+            height: 30px;
+            width: 1px;
+            background-color: #47474A;
+            border: 0px;
+        }
+
+        .cancel-btn{
+            color: white;
         }
     }
 
+    .create-modal-container{
+    
+        & > h3{
+            margin-bottom: 12px;
+        }
+        .input-folder{
+            background-color: #1F1F23;
+            padding: 16px;
+            outline: none;
+            border: 0px;
+            border-radius: 8px;
+            width: 100%;
+            color: white;
+    
+            &::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+                color: #A1A1A14F;
+                opacity: 1; /* Firefox */
+              }
+              
+              &:-ms-input-placeholder { /* Internet Explorer 10-11 */
+                color: #A1A1A14F;
+              }
+              
+              &::-ms-input-placeholder { /* Microsoft Edge */
+                color: #A1A1A14F;
+            }
+    
+        }
+    
+        .err-msg{
+            color: red;
+            font-size: 14px;
+            height: 21px;
+        }
+    }
 }
