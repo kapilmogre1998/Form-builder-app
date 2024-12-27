@@ -3,7 +3,7 @@ import { ThemeContext } from '../../contexts/ThemeContext'
 import FormDashboardHeader from '../Common/Header/FormDashboardHeader'
 import Modal from '../Common/Modal/Modal'
 import useUserData from '../../hooks/useUserData'
-import { createDeleteFolderAPI, createNewFolderAPI, createNewFormAPI, getFolderListAPI } from './api'
+import { deleteFolderAPI, createNewFolderAPI, createNewFormAPI, getFolderListAPI, deleteFormAPI } from './api'
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { AiOutlineFolderAdd } from "react-icons/ai";
 
@@ -15,11 +15,12 @@ const DEFAULT_FILE = { title: 'Create typebot', id: '1', uniqueId: 'CRREATE_TYPE
 const FormDashboard = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const [modal, setModal] = useState({ show: false, type: 'CREATE_FOLDER', modalData: {} })
-  const [folderList, setFolderList] = useState([DEFAULT_FOLDER]);
+  const [folderList, setFolderList] = useState([]);
   const [allFormList, setAllFormList] = useState([]);
-  const [activeFormList, setActiveFormList] = useState([])
-  const [folderName, setFolderName] = useState({ name: '', isError: false });
-  const [formName, setFormName] = useState({ name: '', isError: false });
+  const [activeFormList, setActiveFormList] = useState(null)
+  const [defaultFormList, setDefaultFormList] = useState([]);
+  const [folderName, setFolderName] = useState({ name: '', isError: false, errorMsg: '' });
+  const [formName, setFormName] = useState({ name: '', isError: false, errorMsg: '' });
 
   const userData = useUserData();
 
@@ -28,7 +29,7 @@ const FormDashboard = () => {
       const res = await getFolderListAPI(userData.userId);
       if (res.data) {
 
-        const folders = res.data.data.map(({ _id, folderName }) => ({
+        const folders = res.data.data.filter(folder => folder.folderName !== 'NO_FOLDER').map(({ _id, folderName }) => ({
           id: _id,
           title: folderName,
           isActive: false
@@ -40,8 +41,16 @@ const FormDashboard = () => {
           folderId: folder._id
         }))).flat();
 
+        const defaultForms = res.data.data.filter(folder => folder.folderName === 'NO_FOLDER').map(folder => folder.forms.map(form => ({
+          id: form._id,
+          title: form.formName,
+          folderId: folder._id,
+        }))).flat();
+
         setFolderList([...folders]);
         setAllFormList([...forms]);
+        setDefaultFormList(defaultForms); //Show this default list when no folder is selected.
+
       }
     } catch (error) {
       alert('something went wrong!')
@@ -62,19 +71,22 @@ const FormDashboard = () => {
     setModal({ ...modal, show: true, type: 'DELETE_FOLDER', modalData: { folderId: id } });
   }
 
-  const handleClickonDeleteFile = (e, id) => {
+  const handleClickonDeleteForm = (e, obj) => {
     e.stopPropagation();
-    setModal({ ...modal, show: true, type: 'DELETE_FILE' })
+    setModal({ ...modal, show: true, type: 'DELETE_FORM', modalData: obj })
   }
 
   const createNewFolder = async () => {
     try {
       const payload = {
         userId: userData.userId,
-        folderName: folderName.name
+        folderName: folderName.name.trim()
       }
       const res = await createNewFolderAPI(payload);
-      if (res.data) {
+
+      if (res.data.message === 'Folder already exists') {
+        setFolderName(prev => ({...prev, errorMsg: 'Folder name already exists.', isError: true}))
+      } else if (res.data && res.status == 200) {
         await fetchFolderList();
         closeModal();
       }
@@ -86,12 +98,15 @@ const FormDashboard = () => {
   const createNewForm = async () => {
     try {
       const payload = {
-        name: formName,
+        name: formName.name,
         userId: userData.userId,
-        folderId: modal.modalData.folderId
+        folderId: modal?.modalData?.folderId || ''
       }
       const res = await createNewFormAPI(payload);
-      if (res.data) {
+
+      if (res.data.message === 'Folder already exists') {
+        setFormName(prev => ({...prev, errorMsg: 'Form name already exists.', isError: true}))
+      } else if (res.data && res.status == 200) {
         await fetchFolderList();
         closeModal();
       }
@@ -102,45 +117,74 @@ const FormDashboard = () => {
 
   const handleClickOnDone = async () => {
     if (modal?.type === 'CREATE_FOLDER' && !folderName.name.trim().length) {
-      return setFolderName({ name: '', isError: true })
+      return setFolderName({ name: '', isError: true, errorMsg: 'Please enter a valid folder name' })
       
     }
     if (modal?.type === 'CREATE_FORM' && !formName.name.trim().length) {
-      return setFormName({ name: '', isError: true });
+      return setFormName({ name: '', isError: true, errorMsg: 'Please enter a valid form name' });
     }
 
     modal?.type === 'CREATE_FOLDER' ? createNewFolder() : createNewForm();
   }
 
   const closeModal = () => {
-    setFolderName({ name: '', isError: false });
-    setFormName({ name: '', isError: false });
+    setFolderName({ name: '', isError: false, errorMsg: '' });
+    setFormName({ name: '', isError: false, errorMsg: '' });
     setModal({ ...modal, show: false })
   }
   
   const handleInputChange = (e) => {
     if (modal?.type === 'CREATE_FORM') {
-      setFormName({ name: e.target.value, isError: false });
+      setFormName({ name: e.target.value, isError: false, errorMsg: '' });
     } else {
-      setFolderName({ name: e.target.value, isError: false });
+      setFolderName({ name: e.target.value, isError: false, errorMsg: '' });
     }
     e.stopPropagation()
   }
 
-  const handleConfirmToDelete = async () => {
+  const deleteFolder = async () => {
     try {
       const data = {
         folderId: modal.modalData.folderId,
         userId: userData.userId
       }
-      const res = await createDeleteFolderAPI(data);
+      
+      const res = await deleteFolderAPI(data);
       if (res.data) {
         await fetchFolderList();
+        if(folderList.length <= 1){
+          setActiveFormList(null)
+        }
         closeModal();
       }
     } catch (error) {
       console.log(error);
     }
+  }
+
+  const deleteForm = async () => {
+    try {
+      const data = {
+        folderId: modal.modalData.folderId,
+        userId: userData.userId,
+        formId: modal.modalData.formId
+      }
+      
+      const res = await deleteFormAPI(data);
+      if (res.data) {
+        await fetchFolderList();
+        if(folderList.length <= 1){
+          setActiveFormList(null)
+        }
+        closeModal();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  const handleConfirmToDelete = () => {
+    modal?.type === 'DELETE_FOLDER' ? deleteFolder() : deleteForm();
   }
 
   useEffect(() => {
@@ -156,13 +200,10 @@ const FormDashboard = () => {
       </header>
       <div className='create-folder-container' >
         <div className='folder-list' >
-          {/* Render Default Folder */}
           <span key={DEFAULT_FOLDER.id}className='folder flex'onClick={() => setModal({ show: true, type: 'CREATE_FOLDER' })}>
             <AiOutlineFolderAdd style={{ fontSize: '20px' }} />
             <span>{DEFAULT_FOLDER.title}</span>
           </span>
-
-          {/* Folder List */}
           {
             folderList.map(({ title, id, isActive }) => (
               <div key={id} className={`folder ${isActive ? 'active' : ''}`} onClick={(event) => handleClickOnFolder(event, id)} >
@@ -174,18 +215,15 @@ const FormDashboard = () => {
         </div>
 
         <div className='forms' >
-          {/* Render Default Form */}
           <div key={DEFAULT_FILE.id} className='form' onClick={() => setModal({ show: true, type: 'CREATE_FORM' })}>
             <div className='plus-icon'>+</div>
             <div>{DEFAULT_FILE.title}</div>
           </div>
-
-          {/* Render Active Forms List */}
           {
-            activeFormList.map(({ title, id }) => (
+            (activeFormList == null ? defaultFormList : activeFormList).map(({ title, id, folderId }) => (
               <div key={id} className='form' onClick={() => {}} >
                 <div>{title}</div>
-                <div className='form-delete-icon' onClick={handleClickonDeleteFile} ><RiDeleteBin6Line className='delete' /></div>
+                <div className='form-delete-icon' onClick={(e) => handleClickonDeleteForm(e, { folderId, formId: id })} ><RiDeleteBin6Line className='delete' /></div>
               </div>
             ))
           }
@@ -198,8 +236,8 @@ const FormDashboard = () => {
               <h3>Create New {modal?.type === 'CREATE_FORM' ? 'Form' : 'Folder'}</h3>
               <input type='text' className='input-folder' placeholder='Enter folder name...' value={folderName.text} onChange={handleInputChange} />
               <div className='err-msg' >
-                {modal?.type === 'CREATE_FOLDER' && folderName.isError && 'Please enter a valid folder name'}
-                {modal?.type === 'CREATE_FORM' && formName.isError && 'please enter a valid form name'}
+                {modal?.type === 'CREATE_FOLDER' && folderName.isError && folderName.errorMsg ? folderName.errorMsg : ''}
+                {modal?.type === 'CREATE_FORM' && formName.isError && formName.errorMsg ? folderName.errorMsg : ''}
               </div>
               <div className='action-buttons' >
                 <button className='done-btn btn' onClick={handleClickOnDone}>Done</button>

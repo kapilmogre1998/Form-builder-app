@@ -17,7 +17,7 @@ router.post('/create/form', async (req, res) => {
             }
         } else {
             // If folderId is not provided, create a new folder
-            folder = await Folder.create({ folderName: 'NO_FOLDER_PROVIDED', owner: userId });
+            folder = await Folder.create({ folderName: 'NO_FOLDER', owner: userId });
         }
 
         // Create the form

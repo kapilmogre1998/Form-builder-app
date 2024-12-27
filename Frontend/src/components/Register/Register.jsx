@@ -37,7 +37,7 @@ const Register = () => {
         let isError = false;
         const { username, email, password, confirmPassword } = formData;
 
-        if (!username.length) {
+        if (!username.trim().length) {
             setUserNameError('Please ')
         }
 
@@ -60,7 +60,7 @@ const Register = () => {
             return;
         }
         const data = {
-            username,
+            username: username.trim(),
             email,
             password
         }

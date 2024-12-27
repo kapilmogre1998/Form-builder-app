@@ -10,10 +10,46 @@ import './Settings.scss';
 const Settings = () => {
     const [formData, setFormData] = useState({ userName: '', email: '', oldPassword: '', newPassword: '' })
     const [hide, setHide] = useState({ emailHide: true, oldPasswordHide: true, newPasswordHide: true })
+    const [error, setError] = useState({ name: '', email: '', oldPassword: '', newPassword: ''  })
     const navigate = useNavigate()
 
     const handleOnChange = (e) => {
         setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
+    }
+
+    const validateEmail = (email) => {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    };
+
+    const handleClickOnUpdate = (e) => {
+        e.preventDefault();
+        let isError = false;
+        const { username, email, oldPassword, newPassword } = formData;
+
+        if (!username.trim().length) {
+            setError(prev => ({ ...prev, name: 'Please enter a valid name.' }));
+            isError = true;
+        }
+
+        if (!validateEmail(email)) {
+            setError(prev => ({ ...prev, email: 'Please enter a valid email address.' }));
+            isError = true
+        }
+
+        if (oldPassword.length < 6) {
+            setError(prev => ({ ...prev, oldPassword: 'Password must be at least 6 characters long.' }));
+            isError = true;
+        }
+
+        if (newPassword.length !== oldPassword.length || newPassword !== oldPassword) {
+            setError(prev => ({ ...prev, newPassword: 'confirm password does not match with password.' }))
+            isError = true;
+        }
+
+        if (isError) {
+            return;
+        }
     }
 
     const handleLogout = () => {
@@ -25,7 +61,7 @@ const Settings = () => {
         <div className='settings-container' >
             <h3 className='title' >Settings</h3>
             <div className='form-fields' >
-                <form className='login-form-container' onSubmit={() => { }}>
+                <form className='form-container' onSubmit={() => { }}>
                     <div className='form-group' >
                         <FaRegUser style={{ color: '#828282', width: '22px', height: '22px', paddingLeft: '4px' }} />
                         <input
@@ -38,6 +74,7 @@ const Settings = () => {
                             required
                         />
                     </div>
+                    <div className='err-msg' >{error.name || ''}</div>
 
                     <div className='form-group' >
                         <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -60,6 +97,7 @@ const Settings = () => {
                             <BiHide className='pointer' onClick={() => setHide(prev => ({ ...prev, emailHide: !prev.emailHide }))} style={{ color: '#828282', width: '34px', height: '34px' }} />
                         }
                     </div>
+                    <div className='err-msg' >{error.email || ''}</div>
 
                     <div className='form-group' >
                         <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -82,6 +120,7 @@ const Settings = () => {
                             <BiHide className='pointer' onClick={() => setHide(prev => ({ ...prev, oldPasswordHide: !prev.oldPasswordHide }))} style={{ color: '#828282', width: '34px', height: '34px' }} />
                         }
                     </div>
+                    <div className='err-msg' >{error.oldPassword || ''}</div>
 
                     <div className='form-group' >
                         <svg width="34" height="34" viewBox="0 0 34 34" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -104,9 +143,10 @@ const Settings = () => {
                             <BiHide className='pointer' onClick={() => setHide(prev => ({ ...prev, newPasswordHide: !prev.newPasswordHide }))} style={{ color: '#828282', width: '34px', height: '34px' }} />
                         }
                     </div>
+                    <div className='err-msg' >{error.newPassword || ''}</div>
 
                     <div className="update-btn" >
-                        <button type="submit">Update</button>
+                        <button type="submit" onClick={handleClickOnUpdate} >Update</button>
                     </div>
                 </form>
                 <div className='logout-btn' onClick={handleLogout} ><LuLogOut /> Logout</div>

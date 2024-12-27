@@ -25,35 +25,6 @@ router.get('/all/folders', async (req, res) => {
     }
 })
 
-router.post('/create/form', async (req, res) => {
-    const { name, folderId, userId } = req.body;
-
-    try {
-        // Find the folder by ID
-        const folder = await Folder.findById(folderId);
-        console.log(folder, 'folder')
-        if (!folder) {
-            return res.status(400).json({ message: 'Folder does not exist.' });
-        }
-
-        // Create a new form document
-        const form = await Form.create({ formName: name, folder: folderId, owner: userId });
-
-        // Push the form's ID to the folder's forms array
-        folder.forms.push({
-            formName: name,
-            fileId: form._id,
-            owner: userId,
-            createdAt: new Date()
-        });
-        await folder.save();
-
-        res.status(200).json({ message: 'Form added successfully' });
-    } catch (error) {
-        console.error(error);
-    }
-})  
-
 router.post('/create/folder', async (req, res) => {
     try {
         const { folderName, userId } = req.body;
@@ -61,11 +32,11 @@ router.post('/create/folder', async (req, res) => {
         const folderExists = await Folder.findOne({ folderName, owner: userId })
 
         if(folderExists){
-            return res.status(400).json({ message: 'Folder already exists.' })
+            return res.status(200).json({ message: 'Folder already exists' })
         }
 
-        const data = await Folder.create({ folderName, owner: userId });
-        console.log("🚀 ~ router.post ~ data:", data)
+        await Folder.create({ folderName, owner: userId });
+
         res.status(200).send({ message: 'Folder created successfully' });
     } catch (error) {
         console.log(error);
@@ -91,10 +62,72 @@ router.post('/delete/folder', async (req, res) => {
             return res.status(400).json({ message: "Folder could not be deleted." });
         }
 
-        console.log("🚀 ~ router.delete ~ Folder deleted:", result);
         res.status(200).send({ message: 'Folder is deleted successfully' })
     } catch (error) {
-        console.log(error);
+        res.status(500).json({ message: "Something went wrong" })
+    }
+})
+
+router.post('/create/form', async (req, res) => {
+    const { name, folderId, userId } = req.body;
+
+    try {   
+        let folder;
+
+        if (folderId) {
+            // Find the folder by ID if provided
+            const folder = await Folder.findById(folderId);
+
+            if (!folder) {
+                return res.status(400).json({ message: 'Folder does not exist.' });
+            }
+        } else {
+            const findFolder = await Folder.findOne({ folderName: 'NO_FOLDER', owner: userId })
+            console.log("🚀 ~ router.post ~ findFolder:", findFolder)
+
+            if(findFolder){
+                folder = findFolder;
+            } else {
+                const createFolder = await Folder.create({ folderName: 'NO_FOLDER', owner: userId })
+                console.log("🚀 ~ router.post ~ folder:", createFolder)
+                folder = createFolder;
+            }
+        }
+
+        // Push the form's ID to the folder's forms array
+        folder.forms.push({
+            formName: name,
+            owner: userId,
+            createdAt: new Date()
+        });
+
+        await folder.save();
+
+        res.status(200).json({ message: 'Form added successfully' });
+    } catch (error) {
+        res.status(500).json({ message: "Something went wrong" })
+    }
+})  
+
+router.post('/delete/form', async(req, res) => {
+    try {
+        const { formId, folderId, userId } = req.body;
+
+        const folder = await Folder.findOne({_id: folderId, owner: userId});
+
+        if(!folder){
+            return res.status(400).json({ message: 'Folder does not exist.' });
+        }
+
+        const result = await Folder.updateOne({ $pull: { forms: { _id: formId }}});
+
+        if (result.deletedCount === 0) {
+            return res.status(400).json({ message: "Form could not be deleted." });
+        }
+
+        res.status(200).send({ message: 'Folder is deleted successfully' })
+    }  catch (error) {
+        console.log("🚀 ~ router.post ~ error:", error)
         res.status(500).json({ message: "Something went wrong" })
     }
 })
