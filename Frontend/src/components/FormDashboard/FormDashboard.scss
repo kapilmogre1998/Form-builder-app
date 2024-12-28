@@ -19,7 +19,13 @@
     
     &.light-mode {
         background-color: white;
-        color: #1A5FFF;
+        color: #000000;
+    }
+
+    .form-dashboard-light-mode{
+        background-color: white !important;
+        border: 1px solid #D6D6D6;
+        color: #000000;
     }
 
     &>header {
@@ -27,9 +33,6 @@
             background-color: white;
             color: #1A5FFF;
         }
-
-        padding: 12px 0px;
-        border-bottom: 1px solid #FFFFFF29
     }
 
     .create-folder-container{
@@ -55,6 +58,11 @@
                 &.active{
                     background-color: white;
                     color: #18181B;
+                }
+
+                &.folder-active-light-mode{
+                    background-color: grey !important;
+                    color: white;
                 }
             }
         }
@@ -89,6 +97,10 @@
                 top: -13px;
                 right: -8px;
                 font-size: 20px;
+            }
+
+            &.form-light-mode{
+                background-color: #8d8c8c61;
             }
         }
 

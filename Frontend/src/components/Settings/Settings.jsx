@@ -4,6 +4,8 @@ import { BiHide } from "react-icons/bi";
 import { FaRegUser } from "react-icons/fa";
 import { LuLogOut } from "react-icons/lu";
 import { useNavigate } from 'react-router-dom';
+import { updateUserAPI } from './api';
+import useUserData from '../../hooks/useUserData';
 
 import './Settings.scss';
 
@@ -11,9 +13,20 @@ const Settings = () => {
     const [formData, setFormData] = useState({ userName: '', email: '', oldPassword: '', newPassword: '' })
     const [hide, setHide] = useState({ emailHide: true, oldPasswordHide: true, newPasswordHide: true })
     const [error, setError] = useState({ name: '', email: '', oldPassword: '', newPassword: ''  })
-    const navigate = useNavigate()
+    const [isLoading, setIsLoading] = useState(false);
+    const navigate = useNavigate();
+    const userData = useUserData();
 
     const handleOnChange = (e) => {
+        if(e.target.name === 'email'){
+            setError(prev => ({ ...prev, email: '' }))
+        }
+        if(e.target.value === 'name'){
+            setError(prev => ({ ...prev, name: '' }))
+        }
+        if(e.target.value === 'oldPassword' || e.target.value === 'newPassword'){
+            setError(prev => ({ ...prev, oldPassword: '', newPassword: '' }))
+        }
         setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }))
     }
 
@@ -22,33 +35,70 @@ const Settings = () => {
         return re.test(email);
     };
 
+    const updateUser = async (obj) => {
+        setIsLoading(true);
+        try {
+            const res = await updateUserAPI({...obj, userId: userData.userId});
+            if(res.data){
+                localStorage.setItem("token", res.data.token);
+                localStorage.setItem("user_data", JSON.stringify(res.data.userData))
+                navigate('/form-dashboard');
+            }
+        } catch (error) {
+            console.log(error)
+        } finally {
+            setIsLoading(false);
+        }
+    }
+
     const handleClickOnUpdate = (e) => {
         e.preventDefault();
         let isError = false;
-        const { username, email, oldPassword, newPassword } = formData;
-
-        if (!username.trim().length) {
-            setError(prev => ({ ...prev, name: 'Please enter a valid name.' }));
-            isError = true;
-        }
-
-        if (!validateEmail(email)) {
+        const { userName, email, oldPassword, newPassword } = formData;
+    
+        if (email.length && !validateEmail(email)) {
             setError(prev => ({ ...prev, email: 'Please enter a valid email address.' }));
             isError = true
         }
 
-        if (oldPassword.length < 6) {
+        if(email.length && email == userData.email){
+            setError(prev => ({ ...prev, email: 'entered email address is same as existing one.' }));
+            isError = true
+        }
+    
+        if (oldPassword.length && oldPassword.length < 6) {
             setError(prev => ({ ...prev, oldPassword: 'Password must be at least 6 characters long.' }));
             isError = true;
         }
-
-        if (newPassword.length !== oldPassword.length || newPassword !== oldPassword) {
-            setError(prev => ({ ...prev, newPassword: 'confirm password does not match with password.' }))
+    
+        if (newPassword.length && newPassword.length < 6) {
+            setError(prev => ({ ...prev, newPassword: 'New password must be at least 6 characters long.' }));
+            isError = true;
+        }
+    
+        if (newPassword.length && newPassword !== oldPassword) {
+            setError(prev => ({ ...prev, newPassword: 'New password does not match with old password.' }))
             isError = true;
         }
 
         if (isError) {
             return;
+        }
+
+        const updatedData = {};
+
+        if (userName.length > 0) {
+            updatedData.username = userName;
+        }
+        if (email.length && email !== userData.email) {
+            updatedData.email = email;
+        }
+        if (oldPassword.length && newPassword.length) {
+            updatedData.password = newPassword;
+        }
+
+        if(Object.keys(updatedData).length){
+            updateUser(updatedData);
         }
     }
 
@@ -146,7 +196,7 @@ const Settings = () => {
                     <div className='err-msg' >{error.newPassword || ''}</div>
 
                     <div className="update-btn" >
-                        <button type="submit" onClick={handleClickOnUpdate} >Update</button>
+                        <button type="submit" onClick={handleClickOnUpdate} >{isLoading ? 'Loading...' : 'Update'}</button>
                     </div>
                 </form>
                 <div className='logout-btn' onClick={handleLogout} ><LuLogOut /> Logout</div>
@@ -156,3 +206,4 @@ const Settings = () => {
 }
 
 export default Settings
+

@@ -1,0 +1,84 @@
+.workspace-header-container {
+    position: sticky;
+    top: 0px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 28px;
+    border-bottom: 1px solid rgba(166, 164, 164, 0.741);
+    background-color: #18181B;
+
+    &.light-header{
+        background-color: white;
+        color: #1A5FFF;
+    }
+
+    .left-container{
+        & > input{
+            background-color: #37373E;
+            border: none;
+            outline: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            color: white;
+        }
+
+        &.light-input > input{
+            border: 1px solid #D6D6D6;
+            background-color: white;
+            color: black;
+        }
+    }
+
+    .center-container{
+        display: flex;
+        gap: 1rem;
+        font-size: 14px;
+        align-items: center;
+        
+        .flow-btn{
+            border: 1px solid #1A5FFF;
+            border-radius: 4px;
+            padding: 2px 10px;
+            color: #1A5FFF;
+            cursor: pointer;
+        }
+
+        .response-btn{
+            cursor: pointer;
+        }
+    }
+
+    .action-buttons{
+        display: flex;
+        gap: 2rem;
+        font-size: 13px;
+        align-items: center;
+
+        .switch-buttons{
+            display: flex;
+            gap: 0.75rem;
+            font-weight: 500;
+
+            &.light-mode-switch{
+                color: #000000EB;
+            }
+        }
+
+        .share-btn, .save-btn {
+            color: white;
+            background-color: #1A5FFF;
+            outline: none;
+            border: 0px;
+            padding: 6px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .save-btn {
+            background-color: #4ADE80CC; /* Specific color for save-btn */
+        }
+    }
+
+}

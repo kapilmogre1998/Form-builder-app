@@ -12,7 +12,11 @@ const folderSchema = new Schema({
         required: true
     },
     forms: [{
-        formName: String,
+        formName: {
+            type: String,
+            required: true,
+            unique: true
+        },
         owner: {
             type: Schema.Types.ObjectId,
             ref: 'User'

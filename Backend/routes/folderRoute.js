@@ -76,7 +76,7 @@ router.post('/create/form', async (req, res) => {
 
         if (folderId) {
             // Find the folder by ID if provided
-            const folder = await Folder.findById(folderId);
+            folder = await Folder.findById(folderId);
 
             if (!folder) {
                 return res.status(400).json({ message: 'Folder does not exist.' });
@@ -94,6 +94,12 @@ router.post('/create/form', async (req, res) => {
             }
         }
 
+        const existingForm = folder.forms.find(form => form.formName === name);
+
+        if (existingForm) {
+            return res.status(200).json({ message: 'Form name already exists' });
+        }
+
         // Push the form's ID to the folder's forms array
         folder.forms.push({
             formName: name,
@@ -105,6 +111,7 @@ router.post('/create/form', async (req, res) => {
 
         res.status(200).json({ message: 'Form added successfully' });
     } catch (error) {
+        console.log("🚀 ~ router.post ~ error:", error)
         res.status(500).json({ message: "Something went wrong" })
     }
 })  
@@ -119,11 +126,10 @@ router.post('/delete/form', async(req, res) => {
             return res.status(400).json({ message: 'Folder does not exist.' });
         }
 
-        const result = await Folder.updateOne({ $pull: { forms: { _id: formId }}});
+        folder.forms = folder.forms.filter(form => form._id.toString() !== formId);
 
-        if (result.deletedCount === 0) {
-            return res.status(400).json({ message: "Form could not be deleted." });
-        }
+        // Save the updated folder document
+        await folder.save();
 
         res.status(200).send({ message: 'Folder is deleted successfully' })
     }  catch (error) {

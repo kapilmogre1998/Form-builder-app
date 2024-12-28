@@ -30,7 +30,7 @@ const HomePage = () => {
                 </div>
                 <div className='header-right' >
                     <button className='sign-in-button' onClick={() => navigate('/login')} >Sign in</button>
-                    <button className='create-formbot-button' >Create a FormBot</button>
+                    <button className='create-formbot-button' onClick={() => navigate('/login')} >Create a FormBot</button>
                 </div>
             </header>
 
@@ -41,7 +41,7 @@ const HomePage = () => {
                         Typebot gives you powerful blocks to create unique chat experiences. <br /> Embed them
                         anywhere on your web/mobile apps and start collecting results like magic.
                     </div>
-                    <button>Create a FormBot  for free</button>
+                    <button onClick={() => navigate('/login')} >Create a FormBot  for free</button>
                 </div>
                 <img className='left-image' src={traingleShape} alt="" />
                 <img className='right-image' src={semicircleShape} alt="" />

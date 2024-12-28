@@ -6,14 +6,16 @@ import useUserData from '../../hooks/useUserData'
 import { deleteFolderAPI, createNewFolderAPI, createNewFormAPI, getFolderListAPI, deleteFormAPI } from './api'
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { AiOutlineFolderAdd } from "react-icons/ai";
+import useTheme from '../../hooks/useTheme'
+import { LIGHT } from '../../constant'
 
 import './FormDashboard.scss'
 
 const DEFAULT_FOLDER = { title: 'Create Folder', id: '1', uniqueId: 'CREATE_FOLDER' }
-const DEFAULT_FILE = { title: 'Create typebot', id: '1', uniqueId: 'CRREATE_TYPEBOT' }
+const DEFAULT_FORM = { title: 'Create typebot', id: '1', uniqueId: 'CRREATE_TYPEBOT' }
 
 const FormDashboard = () => {
-  const { theme, toggleTheme } = useContext(ThemeContext);
+  const [ theme, toggleTheme ] = useTheme();
   const [modal, setModal] = useState({ show: false, type: 'CREATE_FOLDER', modalData: {} })
   const [folderList, setFolderList] = useState([]);
   const [allFormList, setAllFormList] = useState([]);
@@ -21,6 +23,7 @@ const FormDashboard = () => {
   const [defaultFormList, setDefaultFormList] = useState([]);
   const [folderName, setFolderName] = useState({ name: '', isError: false, errorMsg: '' });
   const [formName, setFormName] = useState({ name: '', isError: false, errorMsg: '' });
+  const isLightMode = theme == LIGHT;
 
   const userData = useUserData();
 
@@ -29,10 +32,12 @@ const FormDashboard = () => {
       const res = await getFolderListAPI(userData.userId);
       if (res.data) {
 
+        const prevActiveFolderId = folderList.find(folder => folder.isActive)?.id;
+
         const folders = res.data.data.filter(folder => folder.folderName !== 'NO_FOLDER').map(({ _id, folderName }) => ({
           id: _id,
           title: folderName,
-          isActive: false
+          isActive: prevActiveFolderId === _id ? true : false
         }))
 
         const forms = res.data.data.filter((folder) => folder.forms.length).map((folder) => folder.forms.map((form) => ({
@@ -44,13 +49,12 @@ const FormDashboard = () => {
         const defaultForms = res.data.data.filter(folder => folder.folderName === 'NO_FOLDER').map(folder => folder.forms.map(form => ({
           id: form._id,
           title: form.formName,
-          folderId: folder._id,
+          folderId: folder._id
         }))).flat();
 
         setFolderList([...folders]);
         setAllFormList([...forms]);
         setDefaultFormList(defaultForms); //Show this default list when no folder is selected.
-
       }
     } catch (error) {
       alert('something went wrong!')
@@ -100,11 +104,11 @@ const FormDashboard = () => {
       const payload = {
         name: formName.name,
         userId: userData.userId,
-        folderId: modal?.modalData?.folderId || ''
+        folderId: modal?.modalData?.folderId || folderList.find(folder => folder.isActive)?.id || ''
       }
       const res = await createNewFormAPI(payload);
 
-      if (res.data.message === 'Folder already exists') {
+      if (res.data.message === 'Form name already exists') {
         setFormName(prev => ({...prev, errorMsg: 'Form name already exists.', isError: true}))
       } else if (res.data && res.status == 200) {
         await fetchFolderList();
@@ -152,9 +156,7 @@ const FormDashboard = () => {
       const res = await deleteFolderAPI(data);
       if (res.data) {
         await fetchFolderList();
-        if(folderList.length <= 1){
-          setActiveFormList(null)
-        }
+        setActiveFormList(null)
         closeModal();
       }
     } catch (error) {
@@ -171,11 +173,9 @@ const FormDashboard = () => {
       }
       
       const res = await deleteFormAPI(data);
+      debugger;
       if (res.data) {
         await fetchFolderList();
-        if(folderList.length <= 1){
-          setActiveFormList(null)
-        }
         closeModal();
       }
     } catch (error) {
@@ -193,20 +193,27 @@ const FormDashboard = () => {
     }
   }, [userData?.userId])
 
+  useEffect(() => {
+    const activeFolderId = folderList.find(folder => folder.isActive)?.id;
+    if(activeFolderId){
+      setActiveFormList(allFormList.filter(form => form.folderId == activeFolderId))
+    }
+  },[allFormList])
+
   return (
-    <div className={`form-dashboard-container ${theme === "light" ? "light-mode" : ""}`} >
+    <div className={`form-dashboard-container ${isLightMode ? "light-mode" : ""}`} >
       <header>
-        <FormDashboardHeader {...{ theme, toggleTheme }} />
+        <FormDashboardHeader />
       </header>
       <div className='create-folder-container' >
         <div className='folder-list' >
-          <span key={DEFAULT_FOLDER.id}className='folder flex'onClick={() => setModal({ show: true, type: 'CREATE_FOLDER' })}>
+          <span key={DEFAULT_FOLDER.id}className={`folder flex ${isLightMode ? 'form-dashboard-light-mode' : ''}`}onClick={() => setModal({ show: true, type: 'CREATE_FOLDER' })}>
             <AiOutlineFolderAdd style={{ fontSize: '20px' }} />
             <span>{DEFAULT_FOLDER.title}</span>
           </span>
           {
             folderList.map(({ title, id, isActive }) => (
-              <div key={id} className={`folder ${isActive ? 'active' : ''}`} onClick={(event) => handleClickOnFolder(event, id)} >
+              <div key={id} className={`folder ${isActive ? isLightMode ? 'folder-active-light-mode' : 'active' : ''} ${isLightMode ? 'form-dashboard-light-mode' : ''}`} onClick={(event) => handleClickOnFolder(event, id)} >
                 <div>{title}</div>
                 <RiDeleteBin6Line className='delete' onClick={(e) => handleClickonDeleteFolder(e, id)} />
               </div>
@@ -215,13 +222,13 @@ const FormDashboard = () => {
         </div>
 
         <div className='forms' >
-          <div key={DEFAULT_FILE.id} className='form' onClick={() => setModal({ show: true, type: 'CREATE_FORM' })}>
+          <div key={DEFAULT_FORM.id} className={`form ${isLightMode ? 'form-dashboard-light-mode' : ''}`} onClick={() => setModal({ show: true, type: 'CREATE_FORM' })}>
             <div className='plus-icon'>+</div>
-            <div>{DEFAULT_FILE.title}</div>
+            <div>{DEFAULT_FORM.title}</div>
           </div>
           {
             (activeFormList == null ? defaultFormList : activeFormList).map(({ title, id, folderId }) => (
-              <div key={id} className='form' onClick={() => {}} >
+              <div key={id} className={`form ${isLightMode ? 'form-light-mode' : ''}`} onClick={() => {}} >
                 <div>{title}</div>
                 <div className='form-delete-icon' onClick={(e) => handleClickonDeleteForm(e, { folderId, formId: id })} ><RiDeleteBin6Line className='delete' /></div>
               </div>
@@ -237,7 +244,7 @@ const FormDashboard = () => {
               <input type='text' className='input-folder' placeholder='Enter folder name...' value={folderName.text} onChange={handleInputChange} />
               <div className='err-msg' >
                 {modal?.type === 'CREATE_FOLDER' && folderName.isError && folderName.errorMsg ? folderName.errorMsg : ''}
-                {modal?.type === 'CREATE_FORM' && formName.isError && formName.errorMsg ? folderName.errorMsg : ''}
+                {modal?.type === 'CREATE_FORM' && formName.isError && formName.errorMsg ? formName.errorMsg : ''}
               </div>
               <div className='action-buttons' >
                 <button className='done-btn btn' onClick={handleClickOnDone}>Done</button>

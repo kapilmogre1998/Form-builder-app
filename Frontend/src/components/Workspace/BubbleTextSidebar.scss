@@ -1,0 +1,45 @@
+.bubble-text-sidebar {
+    padding-top: 48px;
+
+    & > .bubbles,
+    & > .inputs {
+        &> p {
+            margin-bottom: 6px;
+        }
+        & > div {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+        }
+
+        & > div > div {
+            display: flex;
+            justify-content: start;
+            align-items: center;
+            background-color: #27272A;
+            border: 1px solid #424244;
+            border-radius: 8px;
+            padding: 0px 16px;
+            text-align: left;
+            font-size: 14px;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+    }
+
+    & > .inputs{
+        margin-top: 24px;
+    }
+
+    & > .bubbles {
+        & > div {
+            grid-template-rows: repeat(2, 42px);
+        }
+    }
+
+    & > .inputs {
+        & > div {
+            grid-template-rows: repeat(4, 42px);
+        }
+    }
+}

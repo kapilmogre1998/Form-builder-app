@@ -2,6 +2,7 @@ import { useContext, useEffect, useRef } from 'react'
 import './Modal.scss'
 import useOutsideClick from '../../../hooks/useOutSideClick';
 import { ThemeContext } from '../../../contexts/ThemeContext';
+import { LIGHT } from '../../../constant';
 
 const Modal = ({ children, closeModal }) => {
     const modalRef = useRef(null);
@@ -22,7 +23,7 @@ const Modal = ({ children, closeModal }) => {
     },[])
 
     return (
-        <div  className={`modal-container ${theme === 'light' ? 'light-mode' : ''}`}>
+        <div  className={`modal-container ${theme === LIGHT ? 'light-mode' : ''}`}>
             <div ref={modalRef} className='modal-content'  >
                 {children}
             </div>

@@ -1,0 +1,46 @@
+.workspace-container {
+    --sidebar-width: 330px;
+    background-color: #1F1F23;
+    min-height: 100vh;
+
+    &.light-mode {
+        background-color: white;
+        color: #000000;
+    }
+
+    .form-editor {
+        display: flex;
+        margin-top: 10px;
+        margin-left: 8px;
+
+        .form-sidebar {
+            position: fixed;
+            border: 1px solid #FFFFFF29;
+            height: calc(100vh - 70px);
+            background-color: #18181B;
+            border-radius: 8px;
+            padding: 6px 12px;
+            width: var(--sidebar-width);
+        }
+
+        .content-section {
+            height: 100%;
+            margin-left: calc(var(--sidebar-width) + 20px);
+            width: 100%;
+
+            .form-flow {
+                width: 30%;
+                margin: auto;
+            }
+
+            .start-flag{
+                background-color: #18181B;
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 16px 20px;
+                border-radius: 8px;
+            }
+        }
+    }
+}

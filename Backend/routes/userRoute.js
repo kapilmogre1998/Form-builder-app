@@ -42,6 +42,55 @@ router.post('/register', async (req, res) => {
     }
 })
 
+router.post('/update', async (req, res) => {
+    try {
+        const { userId, username, email, password } = req.body;
+
+        let userData = await User.findById(userId);
+        if (!userData) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        if (email && email !== userData.email) {
+            const isEmailExists = await User.findOne({ email });
+            if (isEmailExists) {
+                return res.status(400).json({ msg: 'Email already exists' });
+            }
+        }
+
+        if (username) {
+            userData.username = username;
+        }
+
+        if (email) {
+            userData.email = email;
+        }
+
+        if (password) {
+            const salt = await bcrypt.genSalt(10);
+            const hashedPassword = await bcrypt.hash(password, salt);
+            userData.password = hashedPassword;
+        }
+
+        userData = await userData.save();
+
+        const token = jwt.sign({ _id: userData._id }, process.env.JWT_SECRET_KEY);
+
+        res.status(200).json({
+            token,
+            userData: {
+                userId: userData._id,
+                userName: userData.username,
+                email: userData.email,
+            },
+            msg: 'User data updated successfully',
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ msg: 'Something went wrong' });
+    }
+});
+
 router.post('/login',async(req,res)=> {
     try {
         const {email,password} = req.body;

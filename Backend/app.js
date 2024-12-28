@@ -11,6 +11,6 @@ app.use('/api', userRoutes)
 
 app.use('/api', folderRoutes)
 
-app.use('/api', fileRoutes)
+// app.use('/api', fileRoutes)
 
 module.exports = app;
