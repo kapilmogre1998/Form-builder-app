@@ -7,3 +7,22 @@
 .not-found{
   color: grey;
 }
+
+.light-mode-theme{
+  background-color: white !important;
+  color: black !important;
+}
+
+.light-mode-border{
+  border: 1px solid #D6D6D6 !important;
+}
+
+.light-mode-blue-color{
+  color: #1A5FFF !important;
+}
+
+.error-msg{
+  color: red;
+  height: 21px;
+  font-size: 14px;
+}

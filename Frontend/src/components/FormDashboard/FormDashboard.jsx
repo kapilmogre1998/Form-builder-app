@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { ThemeContext } from '../../contexts/ThemeContext'
+import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import FormDashboardHeader from '../Common/Header/FormDashboardHeader'
 import Modal from '../Common/Modal/Modal'
 import useUserData from '../../hooks/useUserData'
@@ -15,7 +15,6 @@ const DEFAULT_FOLDER = { title: 'Create Folder', id: '1', uniqueId: 'CREATE_FOLD
 const DEFAULT_FORM = { title: 'Create typebot', id: '1', uniqueId: 'CRREATE_TYPEBOT' }
 
 const FormDashboard = () => {
-  const [ theme, toggleTheme ] = useTheme();
   const [modal, setModal] = useState({ show: false, type: 'CREATE_FOLDER', modalData: {} })
   const [folderList, setFolderList] = useState([]);
   const [allFormList, setAllFormList] = useState([]);
@@ -23,6 +22,8 @@ const FormDashboard = () => {
   const [defaultFormList, setDefaultFormList] = useState([]);
   const [folderName, setFolderName] = useState({ name: '', isError: false, errorMsg: '' });
   const [formName, setFormName] = useState({ name: '', isError: false, errorMsg: '' });
+  const [theme] = useTheme();
+  const navigate = useNavigate();
   const isLightMode = theme == LIGHT;
 
   const userData = useUserData();
@@ -89,7 +90,7 @@ const FormDashboard = () => {
       const res = await createNewFolderAPI(payload);
 
       if (res.data.message === 'Folder already exists') {
-        setFolderName(prev => ({...prev, errorMsg: 'Folder name already exists.', isError: true}))
+        setFolderName(prev => ({ ...prev, errorMsg: 'Folder name already exists.', isError: true }))
       } else if (res.data && res.status == 200) {
         await fetchFolderList();
         closeModal();
@@ -104,12 +105,12 @@ const FormDashboard = () => {
       const payload = {
         name: formName.name,
         userId: userData.userId,
-        folderId: modal?.modalData?.folderId || folderList.find(folder => folder.isActive)?.id || ''
+        folderId: modal?.modalData?.folderId || folderList.find(folder => folder.isActive)?.id || defaultFormList[0]?.folderId
       }
       const res = await createNewFormAPI(payload);
 
       if (res.data.message === 'Form name already exists') {
-        setFormName(prev => ({...prev, errorMsg: 'Form name already exists.', isError: true}))
+        setFormName(prev => ({ ...prev, errorMsg: 'Form name already exists.', isError: true }))
       } else if (res.data && res.status == 200) {
         await fetchFolderList();
         closeModal();
@@ -122,7 +123,7 @@ const FormDashboard = () => {
   const handleClickOnDone = async () => {
     if (modal?.type === 'CREATE_FOLDER' && !folderName.name.trim().length) {
       return setFolderName({ name: '', isError: true, errorMsg: 'Please enter a valid folder name' })
-      
+
     }
     if (modal?.type === 'CREATE_FORM' && !formName.name.trim().length) {
       return setFormName({ name: '', isError: true, errorMsg: 'Please enter a valid form name' });
@@ -136,7 +137,7 @@ const FormDashboard = () => {
     setFormName({ name: '', isError: false, errorMsg: '' });
     setModal({ ...modal, show: false })
   }
-  
+
   const handleInputChange = (e) => {
     if (modal?.type === 'CREATE_FORM') {
       setFormName({ name: e.target.value, isError: false, errorMsg: '' });
@@ -152,7 +153,7 @@ const FormDashboard = () => {
         folderId: modal.modalData.folderId,
         userId: userData.userId
       }
-      
+
       const res = await deleteFolderAPI(data);
       if (res.data) {
         await fetchFolderList();
@@ -171,9 +172,8 @@ const FormDashboard = () => {
         userId: userData.userId,
         formId: modal.modalData.formId
       }
-      
+
       const res = await deleteFormAPI(data);
-      debugger;
       if (res.data) {
         await fetchFolderList();
         closeModal();
@@ -195,10 +195,17 @@ const FormDashboard = () => {
 
   useEffect(() => {
     const activeFolderId = folderList.find(folder => folder.isActive)?.id;
-    if(activeFolderId){
+    if (activeFolderId) {
       setActiveFormList(allFormList.filter(form => form.folderId == activeFolderId))
     }
-  },[allFormList])
+  }, [allFormList])
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      navigate('/login')
+    }
+  }, [])
 
   return (
     <div className={`form-dashboard-container ${isLightMode ? "light-mode" : ""}`} >
@@ -207,7 +214,7 @@ const FormDashboard = () => {
       </header>
       <div className='create-folder-container' >
         <div className='folder-list' >
-          <span key={DEFAULT_FOLDER.id}className={`folder flex ${isLightMode ? 'form-dashboard-light-mode' : ''}`}onClick={() => setModal({ show: true, type: 'CREATE_FOLDER' })}>
+          <span key={DEFAULT_FOLDER.id} className={`folder flex ${isLightMode ? 'form-dashboard-light-mode' : ''}`} onClick={() => setModal({ show: true, type: 'CREATE_FOLDER' })}>
             <AiOutlineFolderAdd style={{ fontSize: '20px' }} />
             <span>{DEFAULT_FOLDER.title}</span>
           </span>
@@ -224,11 +231,11 @@ const FormDashboard = () => {
         <div className='forms' >
           <div key={DEFAULT_FORM.id} className={`form ${isLightMode ? 'form-dashboard-light-mode' : ''}`} onClick={() => setModal({ show: true, type: 'CREATE_FORM' })}>
             <div className='plus-icon'>+</div>
-            <div>{DEFAULT_FORM.title}</div>
+            <div className='title-center' >{DEFAULT_FORM.title}</div>
           </div>
           {
             (activeFormList == null ? defaultFormList : activeFormList).map(({ title, id, folderId }) => (
-              <div key={id} className={`form ${isLightMode ? 'form-light-mode' : ''}`} onClick={() => {}} >
+              <div key={id} className={`form ${isLightMode ? 'form-light-mode' : ''}`} onClick={() => navigate(`/workspace/${folderId}/${id}?formname=${encodeURI(title)}`)} >
                 <div>{title}</div>
                 <div className='form-delete-icon' onClick={(e) => handleClickonDeleteForm(e, { folderId, formId: id })} ><RiDeleteBin6Line className='delete' /></div>
               </div>

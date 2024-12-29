@@ -3,12 +3,14 @@ import ToggleSwitch from '../ToggleSwitch/ToggleSwitch'
 import { useNavigate } from 'react-router-dom'
 import { LIGHT } from '../../../constant'
 import useTheme from '../../../hooks/useTheme'
+import useUserData from '../../../hooks/useUserData'
 
 import './FormDashboardHeader.scss'
 
 const FormDashboardHeader = () => {
     const [theme, toggleTheme] = useTheme()
     const navigate = useNavigate();
+    const userData = useUserData();
 
     const handleClick = (e) => {
         const {value} = e.target;
@@ -21,7 +23,7 @@ const FormDashboardHeader = () => {
     return (
         <div className={`header-container ${theme === LIGHT ? 'light-header': ''}`} >
             <select id="gender" name="gender" onClick={handleClick} >
-                <option value="username" selected>User Name</option>
+                <option value="username" defaultValue>{userData?.userName}</option>
                 <option value="settings" >Settings</option>
             </select>
 

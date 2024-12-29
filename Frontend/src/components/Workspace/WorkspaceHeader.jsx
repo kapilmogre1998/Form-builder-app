@@ -7,16 +7,13 @@ import { RxCross2 } from "react-icons/rx";
 
 import './WorkspaceHeader.scss'
 
-const WorkspaceHeader = ({ formName = '', updateFormName = () => {} }) => {
+const WorkspaceHeader = ({ formName = '', updateFormName = () => {}, isButtonAdded, saveFormBot, enableShare, handleCopyClick }) => {
     const [theme, toggleTheme] = useTheme()
     const navigate = useNavigate();
 
-    const handleClick = (e) => {
-        const {value} = e.target;
-
-        if(value === 'settings'){
-            navigate('/settings');
-        }
+    const handleClickOnSave = () => {
+        if(!isButtonAdded) return;
+        saveFormBot();
     }
 
     return (
@@ -36,9 +33,9 @@ const WorkspaceHeader = ({ formName = '', updateFormName = () => {} }) => {
                     <ToggleSwitch isChecked={theme === LIGHT} toggleSwitch={toggleTheme} />
                     <span>Dark</span>
                 </span>
-                <button className='share-btn' >Share</button>
-                <button className='save-btn' >Save</button>
-                <RxCross2 style={{ color: 'red', fontSize: '24px' }} onClick={() => navigate('/form-dashboard')} />
+                <button className={`share-btn ${!enableShare ? 'disable-btn' : ''}`} onClick={handleCopyClick} >Share</button>
+                <button className={`save-btn ${!isButtonAdded ? 'disable-btn' : ''}`} onClick={handleClickOnSave} >Save</button>
+                <RxCross2 style={{ color: 'red', fontSize: '24px', cursor: 'pointer' }} onClick={() => navigate('/form-dashboard')} />
             </div>
         </div>
     )

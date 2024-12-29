@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Folder = require('../schema/folderSchema');
-const Form = require('../schema/fileSchema');
+// const Form = require('../schema/fileSchema');
 
 router.get('/all/folders', async (req, res) => {
     try {
@@ -82,19 +82,18 @@ router.post('/create/form', async (req, res) => {
                 return res.status(400).json({ message: 'Folder does not exist.' });
             }
         } else {
-            const findFolder = await Folder.findOne({ folderName: 'NO_FOLDER', owner: userId })
-            console.log("🚀 ~ router.post ~ findFolder:", findFolder)
+            const findFolder = await Folder.findOne({ folderId, owner: userId })
 
             if(findFolder){
                 folder = findFolder;
             } else {
                 const createFolder = await Folder.create({ folderName: 'NO_FOLDER', owner: userId })
-                console.log("🚀 ~ router.post ~ folder:", createFolder)
                 folder = createFolder;
             }
         }
 
         const existingForm = folder.forms.find(form => form.formName === name);
+        console.log("🚀 ~ router.post ~ existingForm:", existingForm, folder)
 
         if (existingForm) {
             return res.status(200).json({ message: 'Form name already exists' });

@@ -1,6 +1,11 @@
 .bubble-text-sidebar {
     padding-top: 48px;
 
+    .video-bubble{
+        opacity: 0.5;
+        cursor: not-allowed !important;
+    }
+
     & > .bubbles,
     & > .inputs {
         &> p {
@@ -25,6 +30,16 @@
             gap: 0.5rem;
             cursor: pointer;
         }
+    }
+
+    .icon-clr{
+        color: #1A5FFF;
+        font-size: 18px;
+    }
+
+    .icon-clr1{
+        font-size: 18px;
+        color: #FFA54C;
     }
 
     & > .inputs{

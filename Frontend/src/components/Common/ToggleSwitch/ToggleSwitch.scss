@@ -2,7 +2,7 @@
     position: relative;
     display: inline-block;
     width: 48px;
-    height: 17px;
+    height: 19px;
     
     .toggle-switch-checkbox {
       display: none;
@@ -31,10 +31,10 @@
     
     .toggle-switch-switch {
       position: absolute;
-      top: 1.5px;
+      top: 2px;
       left: 2px;
-      width: 14px;
-      height: 14px;
+      width: 15px;
+      height: 15px;
       border-radius: 20px;
       background-color: white;
       transition: left 0.3s ease-in-out;

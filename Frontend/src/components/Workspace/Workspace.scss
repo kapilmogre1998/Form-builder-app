@@ -21,6 +21,12 @@
             border-radius: 8px;
             padding: 6px 12px;
             width: var(--sidebar-width);
+
+            &.light-bg-shade{
+                border: 1px solid #00000029;
+                box-shadow: 0px 10px 10px -5px #0000000A;
+                box-shadow: 0px 20px 25px -5px #0000001A;
+            }
         }
 
         .content-section {
@@ -31,6 +37,7 @@
             .form-flow {
                 width: 30%;
                 margin: auto;
+                padding-bottom: 20px;
             }
 
             .start-flag{
@@ -40,6 +47,61 @@
                 gap: 0.5rem;
                 padding: 16px 20px;
                 border-radius: 8px;
+                margin-bottom: 24px;
+            }
+
+            .form-elements{
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+
+                .element{
+                    position: relative;
+                    background-color: #18181B;
+                    padding: 16px 20px 0px;
+                    border-radius: 8px;
+    
+                    & > p{
+                        margin-bottom: 8px;
+                    }
+    
+                    & > input{
+                        background-color: #1F1F23;
+                        padding: 10px 16px;
+                        border: none;
+                        outline: none;
+                        border-radius: 4px;
+                        color: white;
+                        width: 100%;
+                    }
+    
+                    .delete-btn{
+                        background-color: #444444;
+                        border-radius: 50%;
+                        position: absolute;
+                        right: -8px;
+                        top: -8px;
+                        width: 25px;
+                        height: 25px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+    
+                        & > .delete-icon{
+                            color: red;
+                            cursor: pointer;
+                            font-size: 15px;
+                        }
+                    }
+
+                    .user-action{
+                        background: #1F1F23;
+                        padding: 10px 16px;
+                        font-size: 12px;
+                        border-radius: 4px;
+                        cursor: not-allowed;
+                    }
+                }
             }
         }
     }

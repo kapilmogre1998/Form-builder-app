@@ -3,14 +3,16 @@
     justify-content: center;
     position: relative;
     align-items: center;
+    padding: 12px 28px;
+    border-bottom: 1px solid rgba(166, 164, 164, 0.741);
 
     &>select {
         outline: none;
         background-color: #1D1D1D;
         color: white;
         width: 180px;
-        border-radius: 4px;
-        padding: 10px 4px;
+        border-radius: 6px;
+        padding: 10px 8px;
         display: flex;
         justify-content: center;
     }
