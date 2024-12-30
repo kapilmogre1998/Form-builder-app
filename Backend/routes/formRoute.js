@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const FormBot = require('../schema/formSchema');
+const Form = require('../schema/formSchema');
 const Folder = require('../schema/folderSchema');
 
-router.post('/create/form-bot', async (req, res) => {
+router.post('/create/form-workspace', async (req, res) => {
     try {
         const { folderId, formName, userId, list, formId } = req.body;
 
@@ -13,17 +13,17 @@ router.post('/create/form-bot', async (req, res) => {
             return res.status(200).json({ message: 'Folder not found' });
         }
 
-        let formBot;
+        let form;
 
-        formBot = await FormBot.findOne({ formId });
+        form = await Form.findOne({ formId });
 
-        if(formBot) {
-            formBot.formName = formName;
-            formBot.elements = list;
+        if(form) {
+            form.formName = formName;
+            form.elements = list;
 
-            await formBot.save();
+            await form.save();
         } else {
-            formBot = await FormBot.create({
+            form = await Form.create({
                 folder: folderId,
                 owner: userId,
                 formName,
@@ -42,14 +42,14 @@ router.post('/create/form-bot', async (req, res) => {
 
         await folder.save();
 
-        res.status(200).json({ message: 'success', formBotId: formBot._id.toString() })
+        res.status(200).json({ message: 'success', formBotId: form._id.toString() })
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Something went wrong!" })
     }
 })
 
-router.get('/get/form-bot', async(req, res) => {
+router.get('/get/form-workspace', async(req, res) => {
     try {
         const { folderId, formId } = req.query;
 
@@ -59,13 +59,13 @@ router.get('/get/form-bot', async(req, res) => {
             return res.status(404).json({ message: 'Folder not found' });
         }
 
-        const formBot = await  FormBot.findOne({ formId });
+        const form = await  Form.findOne({ formId });
 
-        if (!formBot) {
-            return res.status(200).json({ message: 'FormBot not found', data: {} });
+        if (!form) {
+            return res.status(200).json({ message: 'Form not found', data: {} });
         }
 
-        res.status(200).json({ data: {elements: formBot.elements, formName: formBot.formName, formBotId: formBot._id.toString()}, message: 'success' });
+        res.status(200).json({ data: {elements: form.elements, formName: form.formName, formBotId: form._id.toString()}, message: 'success' });
     } catch (error) {
         res.status(500).json({ message: "Something went wrong" })
     }

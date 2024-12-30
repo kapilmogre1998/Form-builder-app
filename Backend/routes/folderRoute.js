@@ -68,7 +68,7 @@ router.post('/delete/folder', async (req, res) => {
     }
 })
 
-router.post('/create/form', async (req, res) => {
+router.post('/create/new-form', async (req, res) => {
     const { name, folderId, userId } = req.body;
 
     try {   

@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const formBotFieldsSchema = new Schema({
+const formSchema = new Schema({
     folder: {
         type: Schema.Types.ObjectId,
         ref: 'Folder',
@@ -40,4 +40,4 @@ const formBotFieldsSchema = new Schema({
     }
 })
 
-module.exports = mongoose.model('FormBot', formBotFieldsSchema);
+module.exports = mongoose.model('form', formSchema);

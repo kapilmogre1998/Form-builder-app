@@ -7,7 +7,7 @@ import BubbleTextSidebar from './BubbleTextSidebar'
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { BUBBLE_TYPES, formatName } from '../../constant';
 import { v4 as uuidv4 } from 'uuid';
-import { createFormBotAPI, fetchFormBotAPI } from './api';
+import { createFormWorkspaceAPI, fetchFormWorkspaceAPI } from './api';
 import useUserData from '../../hooks/useUserData';
 import { ToastContainer, toast } from 'react-toastify';
 
@@ -118,7 +118,7 @@ const Workspace = () => {
             formName
         };
         try {
-            res = await createFormBotAPI(payload);
+            res = await createFormWorkspaceAPI(payload);
             if (res.status == 200 && res.data.message === 'success') {
                 setEnableShare(true); //enable share button when data form bot is successfully saved
                 toast.success('Form saved successfully!');
@@ -126,13 +126,13 @@ const Workspace = () => {
             }
         } catch (error) {
             console.log(error);
-            toast.error(res.data.message || 'Something went wrong!')
+            toast.error(res?.data?.message || 'Something went wrong!')
         }
     }
 
     const fetchFormBot = async () => {
         try {
-            const res = await fetchFormBotAPI({ folderId: params.folderId, formId: params.formId })
+            const res = await fetchFormWorkspaceAPI({ folderId: params.folderId, formId: params.formId })
             if (res?.data?.data?.elements?.length) {
                 setEnableShare(true); //enable share button when data form bot api returns elements array
                 const list = res.data.data.elements.map((elem) => ({

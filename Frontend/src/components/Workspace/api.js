@@ -1,17 +1,17 @@
 import axios from 'axios'
 import { API_URL } from '../../constant'
 
-export const createFormBotAPI = async (data) => {
+export const createFormWorkspaceAPI = async (data) => {
     try {
-        return await axios.post(`${API_URL}/api/create/form-bot`, data);
+        return await axios.post(`${API_URL}/api/create/form-workspace`, data);
     } catch (error) {
        throw error;
     }
 }
 
-export const fetchFormBotAPI = async ({ folderId, formId }) => {
+export const fetchFormWorkspaceAPI = async ({ folderId, formId }) => {
     try {
-        return await axios.get(`${API_URL}/api/get/form-bot?formId=${formId}&folderId=${folderId}`);
+        return await axios.get(`${API_URL}/api/get/form-workspace?formId=${formId}&folderId=${folderId}`);
     } catch (error) {
        throw error;
     }
