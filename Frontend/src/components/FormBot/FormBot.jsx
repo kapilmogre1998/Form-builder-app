@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useParams } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
 import { BUBBLE_TYPES, formatName, USER_INPUT } from '../../constant';
 import { RiSendPlane2Line } from "react-icons/ri";
-import { getFormBotAPI, storeFormBotAPI } from './api';
+import { addViewCountAPI, getFormBotAPI, startViewCountAPI, submitFormBotAPI } from './api';
 
 import './FormBot.scss';
 
@@ -12,47 +13,11 @@ const FormBot = () => {
   const params = useParams();
   const [inputValue, setInputValue] = useState('');
   const formBotId = params.formBotId;
+  const formDataId = useRef(null);
 
-  // const appendAllBubblesBeforUserInput = () => {
-  //   let allBubblesBeforeInput = [];
-
-  //   for (let i = chatBot.length; i < data.length; i++) {
-  //     if (USER_INPUT.includes(data[i].type) && data[i].value.length == 0 ) {
-  //       allBubblesBeforeInput.push(data[i]);
-  //       break;
-  //     } else {
-  //       allBubblesBeforeInput.push(data[i]);
-  //     }
-  //   }
-
-  //   let modifiedList = [...chatBot];
-
-  //   if(chatBot.length > 0){
-  //     const lastElem = chatBot[chatBot.length - 1]
-  //     if(USER_INPUT.includes(lastElem.type)){
-  //       modifiedList = modifiedList.map((item, id) => {
-  //         if(id !== chatBot.length-1){
-  //           return {...item}
-  //         }else{
-  //           return {...item,value: inputValue}
-  //         }
-  //       })
-  //     }
-  //   }else{
-  //     allBubblesBeforeInput.shift()
-  //   }
-
-  //   setChatBot(prev => ([...prev, ...allBubblesBeforeInput]));
-  // };
-
-  const appendAllBubblesBeforUserInput = () => {
+  const appendElementsIntoChatBotList = () => {
     let allBubblesBeforeInput = [];
     let modifiedList = [...chatBot];
-
-    // if (inputValue.trim().length == 0 && chatBot.length > 0) {
-    //   alert('Please fill the input field before sending your message.');
-    //   return;
-    // }
 
     for (let i = chatBot.length; i < data.length; i++) {
       if (USER_INPUT.includes(data[i].type) && data[i].value.length === 0) {
@@ -63,10 +28,12 @@ const FormBot = () => {
       }
     }
 
+    //append input value
     if (chatBot.length > 0) {
       const lastElem = chatBot[chatBot.length - 1];
       if (USER_INPUT.includes(lastElem.type)) {
         modifiedList[modifiedList.length - 1] = { ...lastElem, value: inputValue };
+        // saveChatBotData();
       }
     }
 
@@ -77,31 +44,35 @@ const FormBot = () => {
   const fetchFormBot = async () => {
     if (!formBotId) return;
 
+    let res;
     try {
-      const res = await getFormBotAPI(formBotId);
-      if (res.data.message === 'success') {
-        setData(res.data.data);
+      res = await getFormBotAPI(formBotId);
+      if (res?.data?.message === 'success') {
+        setData(res.data.data.map(({ title, type, value }) => ({ title, type, value})));
       }
     } catch (error) {
-      console.log(error);
+      toast.error(res?.data?.message || 'something went wrong')
     }
   }
 
   const inputType = (item) => {
-    if(item.type === 'user-input-text'){
-      return  <input type="text" placeholder={`${formatName(item.type.split('-')[1])} ${formatName(item.type.split('-')[2])}`} onChange={(e) => setInputValue(e.target.value)} />
+    if (item.type === 'user-input-text') {
+      return <input type="text" placeholder='Enter your text' onChange={(e) => setInputValue(e.target.value)} />
     }
-    if(item.type === 'user-input-number'){
-      return  <input type="text" placeholder={`${formatName(item.type.split('-')[1])} ${formatName(item.type.split('-')[2])}`} onChange={(e) => setInputValue(e.target.value)} />
+    if (item.type === 'user-input-number') {
+      return <input type="text" placeholder='Enter a number' onChange={(e) => setInputValue(e.target.value)} />
     }
-    if(item.type === 'user-input-email'){
-      return  <input type="email" placeholder={`${formatName(item.type.split('-')[1])} ${formatName(item.type.split('-')[2])}`} onChange={(e) => setInputValue(e.target.value)} />
+    if (item.type === 'user-input-email') {
+      return <input type="email" placeholder={`${formatName(item.type.split('-')[1])} ${formatName(item.type.split('-')[2])}`} onChange={(e) => setInputValue(e.target.value)} />
     }
-    if(item.type === 'user-input-phone'){
-      return  <input type="phone" placeholder={`${formatName(item.type.split('-')[1])} ${formatName(item.type.split('-')[2])}`} onChange={(e) => setInputValue(e.target.value)} />
+    if (item.type === 'user-input-phone') {
+      return <input type="phone" placeholder={`${formatName(item.type.split('-')[1])} ${formatName(item.type.split('-')[2])}`} onChange={(e) => setInputValue(e.target.value)} />
     }
-    if(item.type === 'user-input-date'){
-      return  <input type="date" placeholder={`${formatName(item.type.split('-')[1])} ${formatName(item.type.split('-')[2])}`} onChange={(e) => setInputValue(e.target.value)} />
+    if (item.type === 'user-input-date') {
+      return <input type="date" placeholder={`${formatName(item.type.split('-')[1])} ${formatName(item.type.split('-')[2])}`} onChange={(e) => setInputValue(e.target.value)} />
+    }
+    if (item.type === 'user-input-rating') {
+      return <div className='input-rating' >{new Array(5).fill(0).map((item, idx) => (<div className={`${(idx + 1) == inputValue ? 'user-selected-rating' : ''}`} key={idx} onClick={() => setInputValue(idx + 1)} >{idx + 1}</div>))}</div>
     }
   }
 
@@ -116,53 +87,101 @@ const FormBot = () => {
     )
   }
 
+  const handleClickOnSendTheUserInput = () => {
+    if (inputValue.toString().trim().length == 0) {
+      toast.error('Please fill the input field before submitting your message.');
+      return;
+    }
+    
+    let isFirstUserInputFieldPresent = true;
+
+    for(let i = 0;i < chatBot.length;i++){
+      if(USER_INPUT.includes(chatBot[i].type) && chatBot[i].value){
+        isFirstUserInputFieldPresent = false;
+      }
+    }
+
+    chatBot.map(item => item.type)
+    appendElementsIntoChatBotList();
+    
+    //If startCountAPI is false it means it is the first input box and we need to call the API.
+    debugger;
+    if(isFirstUserInputFieldPresent && inputValue.length){
+      const payload = chatBot.map((item, index) => {
+        if(index == chatBot.length - 1){
+          return { ...item, value: inputValue }
+        } 
+        return { ...item }
+      })
+      formStartCount(payload)
+    }
+  };
+
   const userInputJSX = (item, index) => {
     return (
       <div key={index} className='form-bot-user-input'>
         {
-          item.type === 'user-input-button' ? <button className='submit-button' onClick={storeChatBotData} >{item.value}</button> :
-          item.value ?
-            <div className='user-entered-value' placeholder={`${formatName(item.type.split('-')[1])} ${formatName(item.type.split('-')[2])}`} >{item.value}</div> :
-            <>
-              {inputType(item)}
-              <button onClick={handleClickOnSendTheUserInput} ><RiSendPlane2Line /></button>
-            </>
+          item.type === 'user-input-button' ? <button className='submit-button' onClick={saveChatBotData} >{item.value}</button> :
+            item.value ?
+              item.type === 'user-input-rating' ? <div className='input-rating' >{new Array(5).fill(0).map((elem, idx) => (<div className={`${(idx + 1) == item.value ? 'user-selected-rating' : ''}`} key={idx}>{idx + 1}</div>))}</div> :
+                <div className='user-entered-value'>{item.value}</div> :
+              <>
+                {inputType(item)}
+                <button onClick={handleClickOnSendTheUserInput} ><RiSendPlane2Line /></button>
+              </>
         }
       </div>
     )
   }
 
-  const handleClickOnSendTheUserInput = () => {
-    if(inputValue.trim().length == 0){
-      alert('Please fill the input field before sending your message.');
-      return;
+  const formStartCount = async (data) => {
+    let res;
+    try {
+      res = await startViewCountAPI({ formBotId, elements: data });
+      if (res.data.sts == 1 && res.data.formDataId) {
+        formDataId.current = res.data.formDataId;
+       }
+    } catch (error) {
+      toast.error(res?.data?.message || 'something went wrong')
     }
-    appendAllBubblesBeforUserInput();
-  };
+  }
 
-  const storeChatBotData = async () => {
+
+  const saveChatBotData = async () => {
+    let res;
     try {
       const payload = {
         formBotId,
-        elements: chatBot
+        elements: chatBot,
+        formDataId: formDataId.current
       }
-      const res = await storeFormBotAPI(payload)
-      console.log("🚀 ~ storeChatBotData ~ res:", res)
-      if(res.status == 200){
-        alert(res.data.message)
+      res = await submitFormBotAPI(payload);
+      if (res.status == 200) {
+        toast.success(res.data.message)
       }
     } catch (error) {
-      
+      toast.error(res?.data?.message || 'something went wrong')
+    }
+  }
+
+  const addViewCount = async () => {
+    let res;
+    try {
+      res = await addViewCountAPI({ formBotId });
+      if (res.data.sts == 1) { }
+    } catch (error) {
+      toast.error(res?.data?.message || 'something went wrong')
     }
   }
 
   useEffect(() => {
     fetchFormBot();
+    addViewCount();
   }, [])
 
   useEffect(() => {
     if (data.length) {
-      appendAllBubblesBeforUserInput();
+      appendElementsIntoChatBotList();
     }
   }, [data])
 
@@ -176,6 +195,16 @@ const FormBot = () => {
           })
         }
       </div>
+      <ToastContainer 
+        position="top-right"
+        autoClose={1500}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnHover={false}
+        theme={'dark'}
+      />
     </div>
   )
 }

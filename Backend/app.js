@@ -5,6 +5,9 @@ const userRoutes = require('./routes/userRoute');
 const folderRoutes = require('./routes/folderRoute');
 const formRoutes = require('./routes/formRoute');
 const formBotRoutes = require('./routes/formBotRoute');
+const cors = require('cors');
+
+app.use(cors());
 
 app.use(bodyParser.json());
 

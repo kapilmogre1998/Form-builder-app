@@ -33,11 +33,7 @@ const formSchema = new Schema({
         value: {
             type: String
         }
-    }],
-    createAt: {
-        type: Date,
-        default: Date.now
-    }
+    }]
 })
 
 module.exports = mongoose.model('form', formSchema);

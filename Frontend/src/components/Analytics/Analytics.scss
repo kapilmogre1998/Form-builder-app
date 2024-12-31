@@ -1,0 +1,91 @@
+.analytics-container {
+    background-color: #1F1F23;
+    min-height: 100vh;
+
+    .view-start-container {
+        display: flex;
+        gap: 4rem;
+        justify-content: center;
+        margin-top: 40px;
+
+        &>div {
+            display: flex;
+            width: 140px;
+            flex-direction: column;
+            background-color: #323232;
+            border-radius: 10px;
+            padding: 12px 16px 20px;
+            gap: 0.25rem;
+            align-items: start;
+            justify-content: start;
+
+            & > div:nth-child(1){
+                font-size: 18px;
+                font-weight: 600;
+            }
+        }
+    }
+
+    .table-container {
+        overflow-x: auto;
+        width: 90%;
+        margin: 50px auto;
+        display: flex;
+        justify-content: center;
+
+        th {
+            border: 1px solid #323232;
+            padding: 10px;
+            text-align: start;
+        }
+        
+        th:not(:first-child) {
+            min-width: 200px;
+        }
+
+        th:nth-child(2) {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        td {
+            border: 1px solid #323232;
+            padding: 10px;
+        }
+
+        td:not(:first-child) {
+            min-width: 200px;
+        }
+    }
+
+    .pie-chart-container{
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 5rem;
+
+        .pie-chart{
+            width: 300px;
+            margin: auto 0px;
+        }
+
+        .complete-rate{
+            background-color: #323232;
+            width: 200px;
+            padding: 20px;
+            font-size: 18px;
+            height: fit-content;
+            border-radius: 10px;
+            margin-bottom: 100px;
+        }
+    }
+
+    .no-response{
+        height: 80vh;
+        color: #69696973;
+        font-size: 24px;
+        display: grid;
+        place-content: center;
+    }
+}

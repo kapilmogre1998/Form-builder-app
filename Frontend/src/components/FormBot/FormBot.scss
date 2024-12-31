@@ -1,13 +1,35 @@
-
-.form-bot-container{
+.form-bot-container {
     display: grid;
     place-content: center;
     margin: auto;
     color: black;
     height: 100vh;
-    
-    .form-bot-box{
-        border: 1px solid red;
+
+    /* width */
+    ::-webkit-scrollbar {
+        width: 10px;
+    }
+
+    /* Track */
+    ::-webkit-scrollbar-track {
+        background: #a9a8a8ac;
+        border-radius: 10px;
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+    }
+
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    .form-bot-box {
+        // border: 1px solid #888;
+        border-radius: 4px;
         height: 500px;
         width: 70vw;
         overflow: auto;
@@ -15,35 +37,37 @@
         display: flex;
         flex-direction: column;
         gap: 2rem;
+        box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;
     }
 
-    .form-bot-bubble{
+    .form-bot-bubble {
         display: flex;
         align-items: center;
         gap: 0.5rem;
 
-        & > .circle{
+        &>.circle {
             background-color: #1A5FFF;
             border-radius: 50%;
             width: 30px;
             height: 30px;
         }
 
-        .element-bg-text{
+        .element-bg-text {
             border-radius: 4px;
             padding: 6px 16px;
             font-size: 14px;
             background-color: rgba(173, 172, 172, 0.371);
         }
 
-        .bubble-image{
+        .bubble-image {
             width: 300px;
             height: 200px;
             border-radius: 4px;
         }
 
     }
-    .form-bot-user-input{
+
+    .form-bot-user-input {
         border-radius: 4px;
         padding: 4px 10px;
         font-size: 14px;
@@ -53,7 +77,7 @@
         justify-content: end;
         gap: 1rem;
 
-        & > input {
+        &>input {
             background-color: white;
             box-shadow: 0px 4px 6.3px 0px #00000040;
             padding: 14px 10px;
@@ -62,7 +86,7 @@
             outline: none;
         }
 
-        & > button{
+        &>button {
             background-color: #1A5FFF;
             padding: 11px 12px;
             border-radius: 4px;
@@ -73,13 +97,13 @@
             align-items: center;
             justify-content: center;
 
-            & > svg {
+            &>svg {
                 color: white;
                 font-size: 20px;
             }
         }
 
-        .user-entered-value{
+        .user-entered-value {
             background-color: #F58C20;
             border-radius: 4px;
             padding: 6px 16px;
@@ -88,7 +112,7 @@
         }
     }
 
-    .submit-button{
+    .submit-button {
         background-color: #1A5FFF;
         color: white;
         border-radius: 4px;
@@ -97,4 +121,42 @@
         cursor: pointer;
     }
 
+    .input-rating{
+        display: flex;
+        gap: 0.75rem;
+        background-color: white;
+        box-shadow: 0px 4px 6.3px 0px #00000040;
+        padding: 8px 20px;
+
+        & > div{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background-color: #1A5FFF;
+            color: white;
+            cursor: pointer;
+        }
+
+        & > .user-selected-rating{
+            background-color: #F58C20;
+        }
+    }
+}
+
+
+@media only screen and (max-width: 600px) {
+    .form-bot-container{
+        display: block;
+        
+        .form-bot-box{
+            height: 100vh;
+            padding: 20px;
+            width: 100vw;
+            box-shadow: none;
+        }
+    }
+    
 }

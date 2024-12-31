@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { ImFlag } from "react-icons/im";
 import WorkspaceHeader from './WorkspaceHeader'
 import useTheme from '../../hooks/useTheme'
@@ -24,6 +24,7 @@ const Workspace = () => {
     const params = useParams();
     const userData = useUserData();
     const isLightMode = theme === "light";
+    const navigate = useNavigate();
 
     const isButtonAdded = useMemo(() => {
         return formElements.find((elem) => elem.elementType == 'user-input-button')?.value?.length ? true : false;
@@ -41,7 +42,7 @@ const Workspace = () => {
     const handleCopyClick = async () => {
         try {
             await navigator.clipboard.writeText(`${window.location.origin}/form-bot/${formBotId}`);
-            alert('Copied to clipboard!');
+            toast.success('Copied to clipboard!');
         } catch (err) {
             console.error('Failed to copy: ', err);
         }
@@ -131,8 +132,9 @@ const Workspace = () => {
     }
 
     const fetchFormBot = async () => {
+        let res;
         try {
-            const res = await fetchFormWorkspaceAPI({ folderId: params.folderId, formId: params.formId })
+            res = await fetchFormWorkspaceAPI({ folderId: params.folderId, formId: params.formId })
             if (res?.data?.data?.elements?.length) {
                 setEnableShare(true); //enable share button when data form bot api returns elements array
                 const list = res.data.data.elements.map((elem) => ({
@@ -146,6 +148,7 @@ const Workspace = () => {
                 setFormBotId(res.data.data.formBotId);
             }
         } catch (error) {
+            toast.error(res?.data?.message || 'Something went wrong!')
             console.log("🚀 ~ fetchFormBot ~ error:", error)
         }
     }
@@ -159,7 +162,7 @@ const Workspace = () => {
 
     return (
         <div className={`workspace-container ${isLightMode ? "light-mode" : ""}`} >
-            <WorkspaceHeader {...{ isButtonAdded, formName, enableShare, handleCopyClick }} saveFormBot={saveFormBot} updateFormName={(name) => setFormName(name)} />
+            <WorkspaceHeader {...{ isButtonAdded, formName, enableShare, handleCopyClick }} saveFormBot={saveFormBot} updateFormName={(name) => setFormName(name)} handleClickOnResponse={() => navigate(`/analytics/${params.formId}`)} />
             <div className='form-editor' >
                 <div className={`form-sidebar ${isLightMode ? 'light-mode-theme light-bg-shade' : ''}`} >
                     <BubbleTextSidebar {...{ formElements, setFormElements }} callback={handleClickOnBubbleText} />
@@ -188,17 +191,15 @@ const Workspace = () => {
                     </div>
                 </div>
             </div>
-            <div >
-                <ToastContainer position="top-right"
-                    autoClose={1500}
-                    hideProgressBar={false}
-                    newestOnTop={false}
-                    closeOnClick={false}
-                    rtl={false}
-                    pauseOnHover={false}
-                    theme={isLightMode ? 'light' : 'dark'}
-                />
-            </div>
+            <ToastContainer position="top-right"
+                autoClose={1500}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick={false}
+                rtl={false}
+                pauseOnHover={false}
+                theme={isLightMode ? 'light' : 'dark'}
+            />
         </div>
     )
 }

@@ -5,7 +5,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 12px 28px;
-    border-bottom: 1px solid rgba(166, 164, 164, 0.741);
+    border-bottom: 1px solid rgba(157, 151, 151, 0.401);
     background-color: #18181B;
     z-index: 100;
 
@@ -36,17 +36,13 @@
         gap: 1rem;
         font-size: 14px;
         align-items: center;
-        
-        .flow-btn{
+        cursor: pointer;
+
+        .active-tab{
             border: 1px solid #1A5FFF;
             border-radius: 4px;
             padding: 2px 10px;
             color: #1A5FFF;
-            cursor: pointer;
-        }
-
-        .response-btn{
-            cursor: pointer;
         }
     }
 

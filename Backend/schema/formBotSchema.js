@@ -7,24 +7,32 @@ const formBotSchema = new Schema({
         ref:'form',
         required:true
     },
-    elements: [{
-        type: {
+    formBotData: [{
+        elements: [{
+            type: {
+                type: String,
+                required: true
+            },
+            title: {
+                type: String,
+                required: true
+            },
+            value: {
+                type: String,
+                required: true
+            }
+        }],
+        submittedAt: {
             type: String,
-            required: true
-        },
-        title: {
-            type: String,
-            required: true
-        },
-        value: {
-            type: String,
-            required: true
+            default: Date.now
         }
     }],
-    submittedAt: {
-        type: Date,
-        default: Date.now
-    }
+    startCount: {
+        type: String
+    },
+    viewCount: {
+        type: String
+    },
 })
 
 module.exports = mongoose.model("FormBot", formBotSchema);
