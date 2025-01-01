@@ -47,6 +47,7 @@ router.post('/update', async (req, res) => {
         const { userId, username, email, password } = req.body;
 
         let userData = await User.findById(userId);
+
         if (!userData) {
             return res.status(404).json({ msg: 'User not found' });
         }
@@ -94,7 +95,9 @@ router.post('/update', async (req, res) => {
 router.post('/login',async(req,res)=> {
     try {
         const {email,password} = req.body;
+
         const userExists = await User.findOne({ email })
+        
         if(!userExists){
             return res.status(400).json({ msg: "User does not exist" })
         }

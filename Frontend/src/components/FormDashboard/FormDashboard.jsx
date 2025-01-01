@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { RiDeleteBin6Line } from "react-icons/ri";
+import { ToastContainer, toast } from 'react-toastify';
+import { AiOutlineFolderAdd } from "react-icons/ai";
 import FormDashboardHeader from '../Common/Header/FormDashboardHeader'
 import Modal from '../Common/Modal/Modal'
 import useUserData from '../../hooks/useUserData'
 import { deleteFolderAPI, createNewFolderAPI, createNewFormAPI, getFolderListAPI, deleteFormAPI } from './api'
-import { RiDeleteBin6Line } from "react-icons/ri";
-import { AiOutlineFolderAdd } from "react-icons/ai";
 import useTheme from '../../hooks/useTheme'
 import { LIGHT } from '../../constant'
 
+
 import './FormDashboard.scss'
+import Loader from '../Common/Loader/Loader';
 
 const DEFAULT_FOLDER = { title: 'Create Folder', id: '1', uniqueId: 'CREATE_FOLDER' }
 const DEFAULT_FORM = { title: 'Create typebot', id: '1', uniqueId: 'CRREATE_TYPEBOT' }
@@ -22,32 +25,36 @@ const FormDashboard = () => {
   const [defaultFormList, setDefaultFormList] = useState([]);
   const [folderName, setFolderName] = useState({ name: '', isError: false, errorMsg: '' });
   const [formName, setFormName] = useState({ name: '', isError: false, errorMsg: '' });
+
   const [theme] = useTheme();
   const navigate = useNavigate();
   const isLightMode = theme == LIGHT;
+  const [isLoading,setIsLoading]=useState(false)
+  // const [idEdit]
 
   const userData = useUserData();
 
-  const fetchFolderList = async () => {
+  const fetchFolderList = async (id) => {
     try {
-      const res = await getFolderListAPI(userData.userId);
+      setIsLoading(true)
+      const res = await getFolderListAPI(id || userData.userId);
       if (res.data) {
 
         const prevActiveFolderId = folderList.find(folder => folder.isActive)?.id;
 
-        const folders = res.data.data.filter(folder => folder.folderName !== 'NO_FOLDER').map(({ _id, folderName }) => ({
+        const folders = res.data.data.folders.filter(folder => folder.folderName !== 'NO_FOLDER').map(({ _id, folderName }) => ({
           id: _id,
           title: folderName,
           isActive: prevActiveFolderId === _id ? true : false
         }))
 
-        const forms = res.data.data.filter((folder) => folder.forms.length).map((folder) => folder.forms.map((form) => ({
+        const forms = res.data.data.folders.filter((folder) => folder.forms.length).map((folder) => folder.forms.map((form) => ({
           id: form._id,
           title: form.formName,
           folderId: folder._id
         }))).flat();
 
-        const defaultForms = res.data.data.filter(folder => folder.folderName === 'NO_FOLDER').map(folder => folder.forms.map(form => ({
+        const defaultForms = res.data.data.folders.filter(folder => folder.folderName === 'NO_FOLDER').map(folder => folder.forms.map(form => ({
           id: form._id,
           title: form.formName,
           folderId: folder._id
@@ -58,8 +65,10 @@ const FormDashboard = () => {
         setDefaultFormList(defaultForms); //Show this default list when no folder is selected.
       }
     } catch (error) {
-      alert('something went wrong!')
+      // alert('something went wrong!')
       console.log(error);
+    } finally{
+      setIsLoading(false)
     }
   }
 
@@ -210,7 +219,7 @@ const FormDashboard = () => {
   return (
     <div className={`form-dashboard-container ${isLightMode ? "light-mode" : ""}`} >
       <header>
-        <FormDashboardHeader />
+        <FormDashboardHeader handleClickOnShare={() => setModal({ show: true, type: 'SHARE' })} fetchFolderList={fetchFolderList} />
       </header>
       <div className='create-folder-container' >
         <div className='folder-list' >
@@ -248,7 +257,7 @@ const FormDashboard = () => {
           <Modal closeModal={closeModal} theme={theme} >
             <div className='create-modal-container' >
               <h3>Create New {modal?.type === 'CREATE_FORM' ? 'Form' : 'Folder'}</h3>
-              <input type='text' className='input-folder' placeholder='Enter folder name...' value={folderName.text} onChange={handleInputChange} />
+              <input type='text' className={`input-folder ${isLightMode ? 'light-mode-grey-theme' : ''}`} placeholder='Enter folder name...' value={folderName.text} onChange={handleInputChange} />
               <div className='err-msg' >
                 {modal?.type === 'CREATE_FOLDER' && folderName.isError && folderName.errorMsg ? folderName.errorMsg : ''}
                 {modal?.type === 'CREATE_FORM' && formName.isError && formName.errorMsg ? formName.errorMsg : ''}
@@ -256,7 +265,7 @@ const FormDashboard = () => {
               <div className='action-buttons' >
                 <button className='done-btn btn' onClick={handleClickOnDone}>Done</button>
                 <button className='divider' />
-                <button className='cancel-btn btn' onClick={closeModal}>Cancel</button>
+                <button className={`cancel-btn btn ${isLightMode ? 'light-mode-grey-clr' : ''}`} onClick={closeModal}>Cancel</button>
               </div>
             </div>
           </Modal>
@@ -270,12 +279,45 @@ const FormDashboard = () => {
               <div className='action-buttons' >
                 <button className='done-btn btn' onClick={handleConfirmToDelete}>Confirm</button>
                 <button className='divider' />
-                <button className='cancel-btn btn' onClick={closeModal}>Cancel</button>
+                <button className={`cancel-btn btn ${isLightMode ? 'light-mode-grey-clr' : ''}`} onClick={closeModal}>Cancel</button>
               </div>
             </div>
           </Modal>
         ) : null
       }
+       {
+        modal?.type === 'SHARE' && modal?.show ? (
+          <Modal contentWidth='550' closeModal={() => setModal({ ...modal, show: false })} >
+            <div className='share-modal' >
+              <div className='title-permission' >
+                <h3>Invite by Email</h3>
+                <div>
+                  <select name="permission" id="permission">
+                    <option value="Edit">Edit</option>
+                    <option value="View">View</option>
+                  </select>
+                </div>
+              </div>
+
+              <input type="text" className={`input-mail ${isLightMode ? 'light-mode-grey-theme' : ''}`} placeholder='Enter email id' />
+              <button className='send-invite-btn' >Send Invite</button>
+
+              <h3>Invite by link</h3>
+              <button className='copy-link' >copy link</button>
+            </div>
+          </Modal>
+        ) : null
+      }
+        <ToastContainer position="top-right"
+                autoClose={1500}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick={false}
+                rtl={false}
+                pauseOnHover={false}
+                theme={theme === LIGHT ? 'light' : 'dark'}
+            />
+            {isLoading && <Loader theme={theme} />}
     </div>
   )
 }

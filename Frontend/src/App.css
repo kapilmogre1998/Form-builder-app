@@ -13,12 +13,25 @@
   color: black !important;
 }
 
+.light-mode-grey-theme{
+  background-color: #c9c7c761 !important;
+  color: black !important;
+}
+
+.light-mode-grey-clr{
+  color: #3b3939f7 !important;
+}
+
 .light-mode-border{
   border: 1px solid #D6D6D6 !important;
 }
 
 .light-mode-blue-color{
   color: #1A5FFF !important;
+}
+
+.light-mode-grey-bg-clr{
+  background-color: #8d8c8c61 !important;
 }
 
 .error-msg{

@@ -7,38 +7,40 @@ import { useNavigate, useParams } from 'react-router-dom'
 import WorkspaceHeader from '../Workspace/WorkspaceHeader'
 import { getFormBotAnalyticDataAPI } from './api';
 import Loader from '../Common/Loader/Loader'
+import useTheme from '../../hooks/useTheme';
 
 import './Analytics.scss'
-import useTheme from '../../hooks/useTheme';
-import { formatDate } from '../../constant';
 
 const Analytics = () => {
     const [isLoading, setIsLoading] = useState(false)
     const [data, setData] = useState({});
     const [tableHeader, setTableHeader] = useState([])
     const [theme] = useTheme();
-    const isLightMode = theme === "light";
-    const navigate = useNavigate();
     const params = useParams();
+    const navigate = useNavigate();
+
+    const isLightMode = theme === "light";
     const formId = params.formId;
 
 
     const fetchBotData = async () => {
         let res;
 
+        setIsLoading(true)
         try {
             res = await getFormBotAnalyticDataAPI(formId);
             if (res.data.sts == 1 && res.data.data.formBotStrucure && res.data.data.formBotData && Object.keys(res.data.data.formBotData).length) {
                 const formBotStructureList = res.data.data.formBotStrucure
                 const formBot = res.data.data.formBotData;
-                const submittedCount = formBot.formBotData.filter(({elements}) => elements.length == formBotStructureList)?.length || 1;
+                const submittedCount = formBot.formBotData.filter(({elements}) => elements.length == formBotStructureList.length)?.length || 1;
 
                 setData({...formBot, submittedCount});
                 setTableHeader(formBotStructureList)
             }
         } catch (error) {
-            console.log("🚀 ~ fetchBotData ~ error:", error)
             toast.error(res.data.message || 'Something went wrong')
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -47,16 +49,16 @@ const Analytics = () => {
     }, [])
 
     return (
-        <div className='analytics-container' >
+        <div className={`analytics-container ${isLightMode ? 'light-mode-theme' : ''}`} >
             <WorkspaceHeader updateFormName={(name) => setFormName(name)} hideOptions={true} activeTab='response' handleClickOnFlow={() => navigate(-1)} />
             {data && Object.keys(data).length ? (
                 <div>
                     <div className='view-start-container' >
-                        <div>
+                        <div className={isLightMode ? 'light-mode-grey-bg-clr' : ''} >
                             <div>Views</div>
                             <div>{data.viewCount}</div>
                         </div>
-                        <div>
+                        <div  className={isLightMode ? 'light-mode-grey-bg-clr' : ''}  >
                             <div>Starts</div>
                             <div>{data.startCount}</div>
                         </div>
@@ -95,20 +97,20 @@ const Analytics = () => {
                                 label={({ dataEntry }) => dataEntry.title}
                                 labelStyle={
                                     {
-                                        fill: "white",
-                                        fontSize: "5px",
-                                        fontFamily: "Helvetica Neue,sans-serif",
-                                        textShadow: "1px 1px 5px #000"
+                                        fill: isLightMode ? 'black' : "white",
+                                        fontSize: "5px"
                                     }
                                 }
                                 data={[
-                                    { title: `${((+data.submittedCount)/(+data.viewCount)*100).toFixed(2)}% completed`, value: +data?.submittedCount, color: '#E38627' },
-                                    { title: '', value: +data?.viewCount, color: '#C13C37' }
+                                    { title: `${((+data.submittedCount)/(+data.viewCount)*100).toFixed(2)}% completed`, value: +data?.submittedCount, color: '#3B82F6' },
+                                    { title: '', value: +data?.viewCount, value: +data?.viewCount - (+data?.submittedCount),color: '#909090' }
                                 ]}
                                 lineWidth='20'
+                                startAngle={-80}
+                                labelPosition={70}
                             />
                         </div>
-                        <div className='complete-rate' >
+                        <div className={`complete-rate  ${isLightMode ? 'light-mode-grey-bg-clr' : ''} `} >
                             <div>Completion Rate</div>
                             <div>{((+data.submittedCount)/(+data.viewCount)*100).toFixed(2)}%</div>
                         </div>
@@ -123,7 +125,7 @@ const Analytics = () => {
                 pauseOnHover={false}
                 theme={isLightMode ? 'light' : 'dark'}
             />
-            {isLoading && <Loader />}
+            {isLoading && <Loader theme={theme} />}
         </div>
     )
 }

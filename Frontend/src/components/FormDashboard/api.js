@@ -40,3 +40,11 @@ export const deleteFormAPI = async (data) => {
        throw error;
     }
 }
+
+export const allWorkspaceAPI = async (id) => {
+    try {
+        return await axios.get(`${API_URL}/api/all-workspace?ownerId=${id}`)
+    } catch (error) {
+       throw error;
+    }
+}

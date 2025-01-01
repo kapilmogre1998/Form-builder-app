@@ -52,7 +52,7 @@ const Workspace = () => {
         const bubbleInputType = e.target.id.split('-'); //spliting elementId to get the element name and title
         let title = ''; //variable for storing the title of the input field
         if (isButtonAdded) {
-            toast('No Element can be added after a button');
+            toast('No field can be added after a button');
             return;
         }
 
