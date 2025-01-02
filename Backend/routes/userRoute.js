@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 dotenv.config();
+const authenticateToken = require('../middleware/authenticateToken')
 
 router.post('/register', async (req, res) => {
     try {
@@ -42,7 +43,7 @@ router.post('/register', async (req, res) => {
     }
 })
 
-router.post('/update', async (req, res) => {
+router.post('/update', authenticateToken, async (req, res) => {
     try {
         const { userId, username, email, password } = req.body;
 
@@ -84,7 +85,7 @@ router.post('/update', async (req, res) => {
                 userName: userData.username,
                 email: userData.email,
             },
-            msg: 'User data updated successfully',
+            message: 'User data updated successfully',
         });
     } catch (error) {
         console.error(error);

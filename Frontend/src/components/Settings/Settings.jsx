@@ -1,10 +1,11 @@
-import React, { useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { IoEyeOutline } from "react-icons/io5";
 import { BiHide } from "react-icons/bi";
 import { FaRegUser } from "react-icons/fa";
 import { LuLogOut } from "react-icons/lu";
 import { useNavigate } from 'react-router-dom';
 import { updateUserAPI } from './api';
+import { ToastContainer, toast } from 'react-toastify';
 import useUserData from '../../hooks/useUserData';
 
 import './Settings.scss';
@@ -14,6 +15,7 @@ const Settings = () => {
     const [hide, setHide] = useState({ emailHide: true, oldPasswordHide: true, newPasswordHide: true })
     const [error, setError] = useState({ name: '', email: '', oldPassword: '', newPassword: ''  })
     const [isLoading, setIsLoading] = useState(false);
+    const timeOutId = useRef(null);
     const navigate = useNavigate();
     const userData = useUserData();
 
@@ -37,12 +39,16 @@ const Settings = () => {
 
     const updateUser = async (obj) => {
         setIsLoading(true);
+        let res;
         try {
-            const res = await updateUserAPI({...obj, userId: userData.userId});
+            res = await updateUserAPI({...obj, userId: userData.userId});
             if(res.data){
                 localStorage.setItem("token", res.data.token);
                 localStorage.setItem("user_data", JSON.stringify(res.data.userData))
-                navigate('/form-dashboard');
+                toast.success(res.data.message)
+                timeOutId.current = setTimeout(() => {
+                    navigate('/form-dashboard');
+                }, 1000)
             }
         } catch (error) {
             console.log(error)
@@ -106,6 +112,10 @@ const Settings = () => {
         localStorage.removeItem('token')
         navigate('/')
     }
+
+    useEffect(() => {
+        return () => clearTimeout(timeOutId.current); // Clear the timeout when component unmounts
+      }, []);
 
     return (
         <div className='settings-container' >
@@ -201,6 +211,15 @@ const Settings = () => {
                 </form>
                 <div className='logout-btn' onClick={handleLogout} ><LuLogOut /> Logout</div>
             </div>
+            <ToastContainer position="top-right"
+                autoClose={1500}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick={false}
+                rtl={false}
+                pauseOnHover={false}
+                theme={'dark'}
+            />
         </div>
     )
 }
