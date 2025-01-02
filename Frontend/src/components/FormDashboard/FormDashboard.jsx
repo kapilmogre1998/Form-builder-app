@@ -6,7 +6,7 @@ import { AiOutlineFolderAdd } from "react-icons/ai";
 import FormDashboardHeader from '../Common/Header/FormDashboardHeader'
 import Modal from '../Common/Modal/Modal'
 import useUserData from '../../hooks/useUserData'
-import { deleteFolderAPI, createNewFolderAPI, createNewFormAPI, getFolderListAPI, deleteFormAPI } from './api'
+import { deleteFolderAPI, createNewFolderAPI, createNewFormAPI, getFolderListAPI, deleteFormAPI, shareWorkspaceAPI } from './api'
 import useTheme from '../../hooks/useTheme'
 import { LIGHT } from '../../constant'
 
@@ -25,12 +25,16 @@ const FormDashboard = () => {
   const [defaultFormList, setDefaultFormList] = useState([]);
   const [folderName, setFolderName] = useState({ name: '', isError: false, errorMsg: '' });
   const [formName, setFormName] = useState({ name: '', isError: false, errorMsg: '' });
+  const [sharePermission, setSharePermission] = useState({
+    permission: 'edit',
+    emailId: ''
+  });
 
   const [theme] = useTheme();
   const navigate = useNavigate();
   const isLightMode = theme == LIGHT;
   const [isLoading,setIsLoading]=useState(false)
-  // const [idEdit]
+  const [emailError, setEmailError] = useState({ isError: false, msg: '' });
 
   const userData = useUserData();
 
@@ -38,8 +42,7 @@ const FormDashboard = () => {
     try {
       setIsLoading(true)
       const res = await getFolderListAPI(id || userData.userId);
-      if (res.data) {
-
+      if (res?.data?.data?.folders) {
         const prevActiveFolderId = folderList.find(folder => folder.isActive)?.id;
 
         const folders = res.data.data.folders.filter(folder => folder.folderName !== 'NO_FOLDER').map(({ _id, folderName }) => ({
@@ -63,9 +66,12 @@ const FormDashboard = () => {
         setFolderList([...folders]);
         setAllFormList([...forms]);
         setDefaultFormList(defaultForms); //Show this default list when no folder is selected.
+      } else {
+        setFolderList([]);
+        setAllFormList([]);
+        setDefaultFormList([]); 
       }
     } catch (error) {
-      // alert('something went wrong!')
       console.log(error);
     } finally{
       setIsLoading(false)
@@ -196,6 +202,59 @@ const FormDashboard = () => {
     modal?.type === 'DELETE_FOLDER' ? deleteFolder() : deleteForm();
   }
 
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const handleCopyClick = async () => {
+    try {
+        await navigator.clipboard.writeText(`${window.location.origin}/form-dashboard?ownerId=${userData.userId}&ownerName=${userData.userName}`);
+        toast.success('Copied to clipboard!');
+    } catch (err) {
+        console.error('Failed to copy: ', err);
+    }
+  };
+
+  const shareWorkspace = async (copyLink) => {
+    let res;
+    try {
+      const payload = {
+        "ownerId": userData.userId,
+        "emailId": copyLink ? '' : sharePermission.emailId,
+        "ownerName": userData.userName,
+        "permission": sharePermission.permission
+      }
+      res = await shareWorkspaceAPI(payload);
+      
+      if(res.data.sts == 1){
+        if(copyLink){
+          await handleCopyClick();
+        } else {
+          toast.success(res.data.message);
+        }
+      }
+    } catch (error) {
+      setEmailError({ isError: true, msg: error.response.data.message });
+    }
+  }
+
+  const handleClickOnSendInvite = async () => {
+    if(!sharePermission.emailId.length){
+      return setEmailError({ isError: true, msg: 'email cannot be empty.' })
+    }
+    if(!validateEmail(sharePermission.emailId)){
+      return setEmailError({ isError: true, msg: 'enter valid emailId.' })
+    }
+    if(sharePermission.emailId == userData.email){
+      return setEmailError({ isError: true, msg: 'you can not send invite to yourself.' })
+    }
+    
+    shareWorkspace();
+  }
+
+  const handleClickOnCopyLink = () => shareWorkspace('COPY_LINK');
+
   useEffect(() => {
     if (userData?.userId) {
       fetchFolderList();
@@ -244,7 +303,7 @@ const FormDashboard = () => {
           </div>
           {
             (activeFormList == null ? defaultFormList : activeFormList).map(({ title, id, folderId }) => (
-              <div key={id} className={`form ${isLightMode ? 'form-light-mode' : ''}`} onClick={() => navigate(`/workspace/${folderId}/${id}?formname=${encodeURI(title)}`)} >
+              <div key={id} className={`form ${isLightMode ? 'form-light-mode' : ''}`} onClick={() => navigate(`/workspace/${userData.userId}/${folderId}/${id}?formname=${encodeURI(title)}`)} >
                 <div>{title}</div>
                 <div className='form-delete-icon' onClick={(e) => handleClickonDeleteForm(e, { folderId, formId: id })} ><RiDeleteBin6Line className='delete' /></div>
               </div>
@@ -287,23 +346,34 @@ const FormDashboard = () => {
       }
        {
         modal?.type === 'SHARE' && modal?.show ? (
-          <Modal contentWidth='550' closeModal={() => setModal({ ...modal, show: false })} >
+          <Modal contentWidth='550' closeModal={() => {
+              setModal({ ...modal, show: false })
+              setSharePermission({ permission: 'edit', emailId: '' });
+              setEmailError({ isError: false, msg: '' })
+            }}
+          >
             <div className='share-modal' >
               <div className='title-permission' >
                 <h3>Invite by Email</h3>
                 <div>
-                  <select name="permission" id="permission">
+                  <select name="permission" id="permission" onClick={(e) => setSharePermission(prev => ({ ...prev, permission: e.target.value }))} >
                     <option value="Edit">Edit</option>
                     <option value="View">View</option>
                   </select>
                 </div>
               </div>
 
-              <input type="text" className={`input-mail ${isLightMode ? 'light-mode-grey-theme' : ''}`} placeholder='Enter email id' />
-              <button className='send-invite-btn' >Send Invite</button>
+              <input type="text" className={`input-mail ${isLightMode ? 'light-mode-grey-theme' : ''}`} placeholder='Enter email id' onChange={(e) => {
+                  setEmailError({ isError: false, msg: '' });
+                  setSharePermission(prev => ({ ...prev, emailId: e.target.value }))
+                }} />
+              <div className='error-msg' >
+                {emailError.isError && emailError.msg ? emailError.msg : ''}
+              </div>
+              <button className='send-invite-btn' onClick={handleClickOnSendInvite} >Send Invite</button>
 
               <h3>Invite by link</h3>
-              <button className='copy-link' >copy link</button>
+              <button className='copy-link' onClick={handleClickOnCopyLink} >copy link</button>
             </div>
           </Modal>
         ) : null

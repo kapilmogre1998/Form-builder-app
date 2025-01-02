@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Workspace = require('../schema/shareWorkspaceSchema');
 const User = require('../schema/userSchema');
+const authenticateToken = require('../middleware/authenticateToken')
 
-router.post('/share-url', async (req, res) => {
+router.post('/share-url', authenticateToken, async (req, res) => {
     try {
         const { ownerId, emailId, permission, ownerName } = req.body;
 
@@ -13,9 +14,11 @@ router.post('/share-url', async (req, res) => {
             if (workspace) {
                 const user = await User.findOne({ email: emailId });
 
-                const existingUser = workspace.accessSettings.find(elem => {
-                    return elem.userId.toString() === user._id.toString();
-                });
+                if(!user){
+                    return res.status(400).json({message:"email is not registered"})
+                }
+
+                const existingUser = workspace.accessSettings.find(elem =>  elem.userId.toString() === user._id.toString());
 
                 if (existingUser) {
                     existingUser.permission = permission;
@@ -28,6 +31,8 @@ router.post('/share-url', async (req, res) => {
                     await workspace.save();
                 }
 
+                res.status(200).json({ sts: 1, message: "User invited successfully" });
+
             } else {
                 const user = await User.findOne({ email: emailId });
 
@@ -39,9 +44,9 @@ router.post('/share-url', async (req, res) => {
                         permission: permission
                     }]
                 })
+                res.status(200).json({ sts: 1, message: "User invited successfully" });
             }
 
-            res.status(200).json({ message: "Shared successfully" });
         } else {
             const users = await User.find({});
 
@@ -63,22 +68,23 @@ router.post('/share-url', async (req, res) => {
                 });
             }
 
-            res.status(200).json({ message: "Shared successfully" });
+            res.status(200).json({ sts: 1, message: "Link is copied successfully" });
         }
 
     } catch (error) {
+        console.log("🚀 ~ router.post ~ error:", error)
         res.status(500).json({ message: "something went wrong" })
     }
 })
 
-router.get('/all-workspace', async (req, res) => {
+router.get('/all-workspace', authenticateToken, async (req, res) => {
     try {
         const { ownerId } = req.query;
 
         const workspaces = await Workspace.find({});
 
         if (!workspaces) {
-            res.status(400).json({ message: "No workspaces found" });
+           return res.status(400).json({ message: "No workspaces found" });
         }
 
         const allWorkspaceOwnerData =[];
@@ -98,7 +104,7 @@ router.get('/all-workspace', async (req, res) => {
 
     } catch (error) {
     console.log("🚀 ~ router.get ~ error:", error)
-
+    res.status(500).json({ message: "Something went wrong" })
     }
 })
 

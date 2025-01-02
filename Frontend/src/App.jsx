@@ -18,7 +18,7 @@ function App() {
         <Route path="/login" element={<LogIn />} />
         <Route path="/form-dashboard" element={<FormDashboard />} />
         <Route path="/settings" element={<Settings />} />
-        <Route path="/workspace/:folderId/:formId" element={<Workspace />} />
+        <Route path="/workspace/:ownerId/:folderId/:formId" element={<Workspace />} />
         <Route path="/form-bot/:formBotId" element={<FormBot />} />
         <Route path="/analytics/:formId" element={<Analytics />} />
         <Route path="/" element={<HomePage />} />

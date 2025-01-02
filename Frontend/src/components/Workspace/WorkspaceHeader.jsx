@@ -7,13 +7,12 @@ import { RxCross2 } from "react-icons/rx";
 
 import './WorkspaceHeader.scss'
 
-const WorkspaceHeader = ({ formName = '', updateFormName = () => { }, isButtonAdded, saveFormBot, enableShare, handleCopyClick, hideOptions = false, activeTab = 'flow', handleClickOnFlow = () => {}, handleClickOnResponse = () => {} }) => {
+const WorkspaceHeader = ({ formName = '', updateFormName = () => { }, isSubmitButtonAdded, saveFormBot, disableSaveBtn, handleCopyClick, hideOptions = false, activeTab = 'flow', handleClickOnFlow = () => {}, handleClickOnResponse = () => {} }) => {
     const [theme, toggleTheme] = useTheme()
     const navigate = useNavigate();
-    // const params = useParams();
 
     const handleClickOnSave = () => {
-        if (!isButtonAdded) return;
+        if (!isSubmitButtonAdded) return;
         saveFormBot();
     }
 
@@ -35,8 +34,11 @@ const WorkspaceHeader = ({ formName = '', updateFormName = () => { }, isButtonAd
                     <span>Dark</span>
                 </span>
                 {hideOptions ? null : <>
-                    <button className={`share-btn ${!enableShare ? 'disable-btn' : ''}`} onClick={handleCopyClick} >Share</button>
-                    <button className={`save-btn ${!isButtonAdded ? 'disable-btn' : ''}`} onClick={handleClickOnSave} >Save</button>
+                    <button className={`share-btn ${!disableSaveBtn ? 'disable-btn' : ''}`} onClick={handleCopyClick} >Share</button>
+                    <button className={`save-btn ${!isSubmitButtonAdded  || disableSaveBtn ? 'disable-btn' : ''}`} onClick={() => {
+                        if(!isSubmitButtonAdded || disableSaveBtn) return;
+                        handleClickOnSave();
+                    }} >Save</button>
                 </>}
                 <RxCross2 style={{ color: 'red', fontSize: '24px', cursor: 'pointer' }} onClick={() => navigate(-1)} />
             </div>

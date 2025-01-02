@@ -2,14 +2,17 @@ const express = require('express');
 const router = express.Router();
 const Form = require('../schema/formSchema');
 const Folder = require('../schema/folderSchema');
+const authenticateToken = require('../middleware/authenticateToken')
 
-router.post('/create/form-workspace', async (req, res) => {
+router.post('/create/form-workspace', authenticateToken, async (req, res) => {
     try {
         const { folderId, formName, userId, list, formId } = req.body;
 
-        const folder = await Folder.findById(folderId);
+        const folderList = await Folder.findOne({ owner: userId, 'folders._id': folderId });
 
-        if (!folder) {
+        const existingFolder = folderList.folders.find(f => f._id.toString() === folderId);
+
+        if (!existingFolder) {
             return res.status(200).json({ message: 'Folder not found' });
         }
 
@@ -32,15 +35,15 @@ router.post('/create/form-workspace', async (req, res) => {
             })
         }
 
-        const formIndex = folder.forms.findIndex(form => form._id.toString() === formId);
+        const formIndex = existingFolder.forms.findIndex(form => form._id.toString() === formId);
 
         if (formIndex === -1) {
             return res.status(404).json({ message: 'Form not found in the folder' });
         }
 
-        folder.forms[formIndex].formName = formName;
+        existingFolder.forms[formIndex].formName = formName;
 
-        await folder.save();
+        await folderList.save();
 
         res.status(200).json({ message: 'success', formBotId: form._id.toString() })
     } catch (error) {
@@ -49,11 +52,13 @@ router.post('/create/form-workspace', async (req, res) => {
     }
 })
 
-router.get('/get/form-workspace', async(req, res) => {
+router.get('/get/form-workspace', authenticateToken, async(req, res) => {
     try {
-        const { folderId, formId } = req.query;
+        const { folderId, formId, ownerId } = req.query;
 
-        const existingFolder = await Folder.findById(folderId);
+        const folderList = await Folder.findOne({ owner: ownerId, 'folders._id': folderId });
+
+        const existingFolder = folderList.folders.find(f => f._id.toString() === folderId);
 
         if (!existingFolder) {
             return res.status(404).json({ message: 'Folder not found' });

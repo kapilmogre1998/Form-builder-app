@@ -1,9 +1,14 @@
 import axios from 'axios'
 import { API_URL } from '../../constant'
 
+const headers = {
+    'Authorization': localStorage.getItem('token'),
+    'Content-Type': 'application/json'
+};
+
 export const getFolderListAPI = async (id) => {
     try {
-        return await axios.get(`${API_URL}/api/all/folders?id=${id}`, )
+        return await axios.get(`${API_URL}/api/all/folders?id=${id}`, {headers} )
     } catch (error) {
        throw error;
     }
@@ -11,7 +16,7 @@ export const getFolderListAPI = async (id) => {
 
 export const createNewFolderAPI = async (data) => {
     try {
-        return await axios.post(`${API_URL}/api/create/folder`, data)
+        return await axios.post(`${API_URL}/api/create/folder`, data, { headers })
     } catch (error) {
        throw error;
     }
@@ -19,7 +24,7 @@ export const createNewFolderAPI = async (data) => {
 
 export const deleteFolderAPI = async (data) => {
     try {
-        return await axios.post(`${API_URL}/api/delete/folder`, data)
+        return await axios.post(`${API_URL}/api/delete/folder`, data, { headers })
     } catch (error) {
        throw error;
     }
@@ -27,7 +32,7 @@ export const deleteFolderAPI = async (data) => {
 
 export const createNewFormAPI = async (data) => {
     try {
-        return await axios.post(`${API_URL}/api/create/new-form`, data)
+        return await axios.post(`${API_URL}/api/create/new-form`, data, { headers })
     } catch (error) {
        throw error;
     }
@@ -35,7 +40,7 @@ export const createNewFormAPI = async (data) => {
 
 export const deleteFormAPI = async (data) => {
     try {
-        return await axios.post(`${API_URL}/api/delete/form`, data)
+        return await axios.post(`${API_URL}/api/delete/form`, data, { headers })
     } catch (error) {
        throw error;
     }
@@ -43,7 +48,15 @@ export const deleteFormAPI = async (data) => {
 
 export const allWorkspaceAPI = async (id) => {
     try {
-        return await axios.get(`${API_URL}/api/all-workspace?ownerId=${id}`)
+        return await axios.get(`${API_URL}/api/all-workspace?ownerId=${id}`, { headers })
+    } catch (error) {
+       throw error;
+    }
+}
+
+export const shareWorkspaceAPI = async (data) => {
+    try {
+        return await axios.post(`${API_URL}/api/share-url`, data, { headers })
     } catch (error) {
        throw error;
     }

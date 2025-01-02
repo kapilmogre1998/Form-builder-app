@@ -1,21 +1,20 @@
 const express = require("express");
 const router = express.Router();
 const Folder = require('../schema/folderSchema');
-// const Form = require('../schema/fileSchema');
+const authenticateToken = require('../middleware/authenticateToken');
 
-router.get('/all/folders', async (req, res) => {
+router.get('/all/folders', authenticateToken, async (req, res) => {
     try {
         const userId = req.query.id;
-        
-        if(!userId){
+
+        if (!userId) {
             console.log(userId);
             return res.status(400).json('UserId is not present.')
         }
 
         const folderList = await Folder.findOne({ owner: userId })
-        console.log("🚀 ~ router.get ~ folderList:", folderList)
 
-        if (!folderList){
+        if (!folderList) {
             return res.status(200).json({ message: 'No folders found.', data: [] })
         }
 
@@ -26,13 +25,13 @@ router.get('/all/folders', async (req, res) => {
     }
 })
 
-router.post('/create/folder', async (req, res) => {
+router.post('/create/folder', authenticateToken, async (req, res) => {
     try {
         const { folderName, userId } = req.body;
 
-        const folderExists = await Folder.findOne({ owner: userId, "folders.folderName": folderName  })
+        const folderExists = await Folder.findOne({ owner: userId, "folders.folderName": folderName })
 
-        if(folderExists){
+        if (folderExists) {
             return res.status(200).json({ message: 'Folder already exists' })
         }
 
@@ -49,14 +48,15 @@ router.post('/create/folder', async (req, res) => {
     }
 })
 
-router.post('/delete/folder', async (req, res) => {
+router.post('/delete/folder', authenticateToken, async (req, res) => {
     try {
         const { userId, folderId } = req.body;
 
-        const folderExists = await Folder.findOne({ owner: userId, folders: { $elemMatch: { _id: folderId } }   })
-        console.log("🚀 ~ router.post ~ folderExists:", folderExists)
+        const folderList = await Folder.findOne({ owner: userId, 'folders._id': folderId });
 
-        if(!folderExists){
+        const folderExists = folderList.folders.find(f => f._id.toString() === folderId);
+
+        if (!folderExists) {
             return res.status(400).json({ message: `Folder doesn't exists.` })
         }
 
@@ -77,75 +77,78 @@ router.post('/delete/folder', async (req, res) => {
     }
 })
 
-router.post('/create/new-form', async (req, res) => {
+router.post('/create/new-form', authenticateToken, async (req, res) => {
     const { name, folderId, userId, folderName = 'NO_FOLDER' } = req.body;
 
-    try {   
-        let folder;
-
+    try {
         if (folderId) {
-            // Find the folder by ID if provided
-            folder = await Folder.findOne({ owner: userId, folders: { $elemMatch: { _id: folderId } }  });
+            const folder = await Folder.findOne({ owner: userId, 'folders._id': folderId });
 
             if (!folder) {
                 return res.status(400).json({ message: 'Folder does not exist.' });
             }
-        } else {
-            const findFolder = await Folder.findOne({ owner: userId, folders: { $elemMatch: { _id: folderId } } })
-            console.log("🚀 ~ router.post ~ findFolder:", findFolder)
 
-            if(findFolder){
-                folder = findFolder;
-            } else {
-                const createFolder = await Folder.findOneAndUpdate(
+            const foundFolder = folder.folders.find(f => f._id.toString() === folderId);
+
+            if (!foundFolder) {
+               return res.status(400).json({ message: 'Folder with specified ID not found inside folders array.' });
+            }
+
+            // Check if the form name already exists in the existing forms
+            const existingForm = foundFolder.forms.find(form => form.formName === name);
+
+            if (existingForm) {
+               return res.status(200).json({ message: 'Form name already exists' });
+            }
+
+            // Add the new form to the forms array in foundFolder
+            foundFolder.forms.push({
+                formName: name,
+                owner: userId,
+                createdAt: new Date()
+            });
+
+            await folder.save();
+        } else {
+                await Folder.findOneAndUpdate(
                     { owner: userId },
-                    { $addToSet: { folders: { folderName, forms: [] } } },
+                    { $addToSet: { folders: { folderName, forms: [{ formName: name, owner: userId, createdAt: new Date() }] } } },
                     { new: true, upsert: true }
                 );
-                folder = createFolder;
-                console.log("🚀 ~ router.post ~ createFolder:", createFolder)
-            }
         }
-
-        const existingForm = folder.folders[0].forms.find(form => form.formName === name);
-
-        if (existingForm) {
-            return res.status(200).json({ message: 'Form name already exists' });
-        }
-
-        // Push the form's ID to the folder's forms array
-        folder.folders[0].forms.push({
-            formName: name,
-            owner: userId,
-            createdAt: new Date()
-        });
-
-        await folder.save();
 
         res.status(200).json({ message: 'Form added successfully' });
     } catch (error) {
         console.log("🚀 ~ router.post ~ error:", error)
         res.status(500).json({ message: "Something went wrong" })
     }
-})  
+})
 
-router.post('/delete/form', async(req, res) => {
+router.post('/delete/form', authenticateToken, async (req, res) => {
     try {
         const { formId, folderId, userId } = req.body;
 
-        const folder = await Folder.findOne({_id: folderId, owner: userId});
+        const folderList = await Folder.findOne({ owner: userId, 'folders._id': folderId });
 
-        if(!folder){
-            return res.status(400).json({ message: 'Folder does not exist.' });
+        const folderExists = folderList.folders.find(f => f._id.toString() === folderId);
+
+        if (!folderExists) {
+            return res.status(400).json({ message: `Folder doesn't exists.` })
         }
 
-        folder.forms = folder.forms.filter(form => form._id.toString() !== formId);
+        folderExists.forms = folderExists.forms.filter(form => form._id.toString() !== formId);
 
-        // Save the updated folder document
-        await folder.save();
+        // Check if the folder is "NO_FOLDER" and its forms list is empty
+        if (folderExists.folderName === "NO_FOLDER" && folderExists.forms.length === 0) {
+            // Remove the folder from the folders array
+            folderList.folders = folderList.folders.filter(f => f._id.toString() !== folderId);
+        }
 
-        res.status(200).send({ message: 'Folder is deleted successfully' })
-    }  catch (error) {
+        // // Save the updated folder document
+        await folderList.save();
+
+        res.status(200).send({ message: 'Form is deleted successfully' })
+    } catch (error) {
         console.log("🚀 ~ router.post ~ error:", error)
         res.status(500).json({ message: "Something went wrong" })
     }

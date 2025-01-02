@@ -18,7 +18,7 @@ const Workspace = () => {
     const [formElements, setFormElements] = useState([]);
     const [formName, setFormName] = useState(decodeURI(new URLSearchParams(new URL(window.location.href).search).get('formname')));
     const [showError, setShowError] = useState(false);
-    const [enableShare, setEnableShare] = useState(false);
+    const [disableSaveBtn, setDisableShareBtn] = useState(false);
     const [formBotId, setFormBotId] = useState('')
     const [theme] = useTheme();
     const params = useParams();
@@ -26,7 +26,7 @@ const Workspace = () => {
     const isLightMode = theme === "light";
     const navigate = useNavigate();
 
-    const isButtonAdded = useMemo(() => {
+    const isSubmitButtonAdded = useMemo(() => {
         return formElements.find((elem) => elem.elementType == 'user-input-button')?.value?.length ? true : false;
     }, [formElements])
 
@@ -51,7 +51,7 @@ const Workspace = () => {
     const handleClickOnBubbleText = (e) => {
         const bubbleInputType = e.target.id.split('-'); //spliting elementId to get the element name and title
         let title = ''; //variable for storing the title of the input field
-        if (isButtonAdded) {
+        if (isSubmitButtonAdded) {
             toast('No field can be added after a button');
             return;
         }
@@ -121,7 +121,7 @@ const Workspace = () => {
         try {
             res = await createFormWorkspaceAPI(payload);
             if (res.status == 200 && res.data.message === 'success') {
-                setEnableShare(true); //enable share button when data form bot is successfully saved
+                setDisableShareBtn(true); //enable share button when data form bot is successfully saved
                 toast.success('Form saved successfully!');
                 setFormBotId(res.data.formBotId); //storing formbot id in ref variable so that it can be used later while sharing the link
             }
@@ -134,9 +134,9 @@ const Workspace = () => {
     const fetchFormBot = async () => {
         let res;
         try {
-            res = await fetchFormWorkspaceAPI({ folderId: params.folderId, formId: params.formId })
+            res = await fetchFormWorkspaceAPI({ folderId: params.folderId, formId: params.formId, ownerId: params.ownerId })
             if (res?.data?.data?.elements?.length) {
-                setEnableShare(true); //enable share button when data form bot api returns elements array
+                setDisableShareBtn(true); //enable share button when data form bot api returns elements array
                 const list = res.data.data.elements.map((elem) => ({
                     elementType: elem.type,
                     title: elem.title,
@@ -162,7 +162,7 @@ const Workspace = () => {
 
     return (
         <div className={`workspace-container ${isLightMode ? "light-mode" : ""}`} >
-            <WorkspaceHeader {...{ isButtonAdded, formName, enableShare, handleCopyClick }} saveFormBot={saveFormBot} updateFormName={(name) => setFormName(name)} handleClickOnResponse={() => navigate(`/analytics/${params.formId}`)} />
+            <WorkspaceHeader {...{ isSubmitButtonAdded, formName, disableSaveBtn, handleCopyClick }} saveFormBot={saveFormBot} updateFormName={(name) => setFormName(name)} handleClickOnResponse={() => navigate(`/analytics/${params.formId}`)} />
             <div className='form-editor' >
                 <div className={`form-sidebar ${isLightMode ? 'light-mode-theme light-bg-shade' : ''}`} >
                     <BubbleTextSidebar {...{ formElements, setFormElements }} callback={handleClickOnBubbleText} />
@@ -182,7 +182,13 @@ const Workspace = () => {
                                         {[...BUBBLE_TYPES, 'user-input-button'].includes(elementType) ? <input className={`${isLightMode ? 'light-mode-theme light-mode-border' : ''}`} type='text' placeholder='Enter text here...' value={value} onChange={(e) => handleOnChange(id, e)} /> : ''}
                                         <p className='error-msg' >{showError && (index == formElements.length - 1) ? 'Field is required!' : ''}</p>
                                         <div className={`delete-btn ${isLightMode ? 'light-mode-theme light-mode-border' : ''}`} >
-                                            <RiDeleteBin6Line className='delete-icon' onClick={() => handleClickOnDelete(id)} />
+                                            <RiDeleteBin6Line className='delete-icon' onClick={() => {
+                                                if(disableSaveBtn) {
+                                                   return toast.error(`Once it is saved you can't edit`)
+                                                }
+                                                handleClickOnDelete(id)
+                                            }}
+                                             />
                                         </div>
                                     </div>
                                 ))

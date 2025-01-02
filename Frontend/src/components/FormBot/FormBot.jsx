@@ -105,7 +105,6 @@ const FormBot = () => {
     appendElementsIntoChatBotList();
     
     //If startCountAPI is false it means it is the first input box and we need to call the API.
-    debugger;
     if(isFirstUserInputFieldPresent && inputValue.length){
       const payload = chatBot.map((item, index) => {
         if(index == chatBot.length - 1){
@@ -115,6 +114,8 @@ const FormBot = () => {
       })
       formStartCount(payload)
     }
+
+    setInputValue('');
   };
 
   const userInputJSX = (item, index) => {
@@ -145,7 +146,6 @@ const FormBot = () => {
       toast.error(res?.data?.message || 'something went wrong')
     }
   }
-
 
   const saveChatBotData = async () => {
     let res;

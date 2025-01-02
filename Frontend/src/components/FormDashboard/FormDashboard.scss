@@ -172,7 +172,7 @@
             width: 90%;
             color: white;
             width: 100%;
-            margin: 16px 0px 8px;
+            margin: 16px 0px 0px;
             font-size: 16px;
         }
 
@@ -190,6 +190,10 @@
             font-weight: bold;
             margin: 14px 0px 18px;
             cursor: pointer;
+        }
+
+        .send-invite-btn{
+            margin-top: 8px;
         }
     }
 

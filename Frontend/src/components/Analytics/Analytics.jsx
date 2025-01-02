@@ -32,7 +32,7 @@ const Analytics = () => {
             if (res.data.sts == 1 && res.data.data.formBotStrucure && res.data.data.formBotData && Object.keys(res.data.data.formBotData).length) {
                 const formBotStructureList = res.data.data.formBotStrucure
                 const formBot = res.data.data.formBotData;
-                const submittedCount = formBot.formBotData.filter(({elements}) => elements.length == formBotStructureList.length)?.length || 1;
+                const submittedCount = formBot.formBotData.filter(({elements}) => elements.length == formBotStructureList.length)?.length || 0;
 
                 setData({...formBot, submittedCount});
                 setTableHeader(formBotStructureList)
@@ -70,19 +70,19 @@ const Analytics = () => {
                                 <tr>
                                     <th></th>
                                     <th><CiCalendar style={{ fontSize: '18px' }} /> Submitted at</th>
-                                    {tableHeader.map(({ title }) => (
-                                        <th>{title}</th>
+                                    {tableHeader.map(({ title }, index) => (
+                                        <th key={index} >{title}</th>
                                     ))}
                                 </tr>
                             </thead>
                             <tbody>
                                 {data.formBotData.map(({ elements, submittedAt }, index) => {
                                     return (
-                                        <tr>
+                                        <tr key={index} >
                                             <td>{index + 1}</td>
                                             <td>{moment?.unix(submittedAt / 1000)?.format('MMM DD, hh:mm A')}</td>
-                                            {(elements.length == tableHeader.length ? elements : [...elements, ...new Array(tableHeader.length - elements.length).fill({})]).map(({ value }) => (
-                                                <td>{value}</td>
+                                            {(elements.length == tableHeader.length ? elements : [...elements, ...new Array(tableHeader.length - elements.length).fill({})]).map(({ value }, idx) => (
+                                                <td key={idx} >{value}</td>
                                             ))}
                                         </tr>
                                     )
@@ -103,11 +103,11 @@ const Analytics = () => {
                                 }
                                 data={[
                                     { title: `${((+data.submittedCount)/(+data.viewCount)*100).toFixed(2)}% completed`, value: +data?.submittedCount, color: '#3B82F6' },
-                                    { title: '', value: +data?.viewCount, value: +data?.viewCount - (+data?.submittedCount),color: '#909090' }
+                                    { title: '', value: +data?.viewCount,color: '#909090' }
                                 ]}
                                 lineWidth='20'
                                 startAngle={-80}
-                                labelPosition={70}
+                                labelPosition={40}
                             />
                         </div>
                         <div className={`complete-rate  ${isLightMode ? 'light-mode-grey-bg-clr' : ''} `} >

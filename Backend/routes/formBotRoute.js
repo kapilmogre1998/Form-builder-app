@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Form = require('../schema/formSchema');
 const FormBot = require('../schema/formBotSchema');
+const authenticateToken = require('../middleware/authenticateToken')
 
 router.get('/get/form-bot/:formBotId', async (req, res) => {
     try {
@@ -119,7 +120,7 @@ router.post('/form/start-count', async (req, res) => {
     }
 })
 
-router.get('/form-bot/analytics', async (req, res) => {
+router.get('/form-bot/analytics', authenticateToken,  async (req, res) => {
     try {
         const { formId } = req.query;
 
@@ -135,9 +136,13 @@ router.get('/form-bot/analytics', async (req, res) => {
             return res.status(400).json({ message: 'FormBot Id is not present' })
         }
 
-        const formBotData = await FormBot.findOne({formBotId});
+        const botData = await FormBot.findOne({formBotId});
+        
+        if(botData.formBotData.length === 0){
+            return res.status(200).json({ message: 'No analytics found for this form yet!', sts: 0, data: { formBotData: [], formBotStructure: form.elements } })
+        }
 
-        return res.status(200).json({ message: 'success', data: {formBotData, formBotStrucure: form.elements}, sts: 1 })
+        return res.status(200).json({ message: 'success', data: {formBotData: botData, formBotStrucure: form.elements}, sts: 1 })
 
     } catch (error) {
         console.log("🚀 ~ router.get ~ error:", error)
