@@ -8,7 +8,16 @@ const formBotRoutes = require('./routes/formBotRoute');
 const shareRoutes = require('./routes/shareWorkspaceRoute');
 const cors = require('cors');
 
-app.use(cors());
+const corsOptions = {
+    origin: ['https://form-builder-app-c5rp.vercel.app'], // Update with your actual frontend URL(s)
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+app.use(cors(corsOptions));
+
+app.options('*', cors());
+
 
 app.use(bodyParser.json());
 
