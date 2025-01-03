@@ -16,7 +16,7 @@ export const createFormWorkspaceAPI = async (data) => {
 
 export const fetchFormWorkspaceAPI = async ({ folderId, formId, ownerId }) => {
     try {
-        return await axios.get(`${API_URL}/api/get/form-workspace?ownerId=${ownerId}&formId=${formId}&folderId=${folderId}`, { headers });
+        return await axios.get(`${API_URL}/api/get/form-workspace?ownerId=${ownerId}&formId=${formId}&folderId=${folderId}`, { headers: getHeaders() });
     } catch (error) {
         throw error;
     }
