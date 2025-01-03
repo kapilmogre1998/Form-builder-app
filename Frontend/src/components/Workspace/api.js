@@ -1,14 +1,14 @@
 import axios from 'axios'
 import { API_URL } from '../../constant'
 
-const headers = {
-    'Authorization': localStorage.getItem('token'),
+const getHeaders = () => ({
+    'Authorization': `Bearer ${localStorage.getItem('token')}`,
     'Content-Type': 'application/json'
-};
+  });
 
 export const createFormWorkspaceAPI = async (data) => {
     try {
-        return await axios.post(`${API_URL}/api/create/form-workspace`, data, { headers });
+        return await axios.post(`${API_URL}/api/create/form-workspace`, data, { headers: getHeaders() });
     } catch (error) {
         throw error;
     }

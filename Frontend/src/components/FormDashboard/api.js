@@ -1,14 +1,14 @@
 import axios from 'axios'
 import { API_URL } from '../../constant'
 
-const headers = {
-    'Authorization': localStorage.getItem('token'),
+const getHeaders = () => ({
+    'Authorization': `Bearer ${localStorage.getItem('token')}`,
     'Content-Type': 'application/json'
-};
+  });
 
 export const getFolderListAPI = async (id) => {
     try {
-        return await axios.get(`${API_URL}/api/all/folders?id=${id}`, {headers} )
+        return await axios.get(`${API_URL}/api/all/folders?id=${id}`, { headers: getHeaders() } )
     } catch (error) {
        throw error;
     }
