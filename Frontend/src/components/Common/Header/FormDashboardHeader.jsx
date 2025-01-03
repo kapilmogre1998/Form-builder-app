@@ -14,7 +14,6 @@ import useWorkspaceData from '../../../hooks/useWorkspaceData'
 const FormDashboardHeader = ({ handleClickOnShare, fetchFolderList }) => {
     const [theme, toggleTheme] = useTheme();
     const [selectOptions, setSelectOptions] = useState([]);
-    const [selectedOption, setSelectedOption] = useState();
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const userData = useUserData();
@@ -29,7 +28,6 @@ const FormDashboardHeader = ({ handleClickOnShare, fetchFolderList }) => {
             } else {
                 localStorage.removeItem('another_user_workspace_data')
             }
-            setSelectedOption(value);
             fetchFolderList(value);
         } else if(value === 'settings'){
             navigate('/settings');
@@ -58,16 +56,16 @@ const FormDashboardHeader = ({ handleClickOnShare, fetchFolderList }) => {
         }
     }, [userData])
 
-    useEffect(() => {
-        if(workspaceData && Object.keys(workspaceData).length){
-            setSelectedOption(workspaceData?.ownerId)
-        }
-    },[workspaceData])
+    // useEffect(() => {
+    //     if(workspaceData){
+    //         setSelectOptions()
+    //     }
+    // },[workspaceData])
 
     return (
         <div className={`header-container ${theme === LIGHT ? 'light-header': ''}`} >
-            <select id="workspace" name="workspace" value={selectedOption} onClick={handleClick} >
-                <option value={userData?.userId} >{userData?.userName} workspace</option>
+            <select id="workspace" name="workspace" onClick={handleClick} >
+                <option value={userData?.userId} defaultValue>{userData?.userName} workspace</option>
                 {selectOptions?.map(({ownerId, ownerName}) => (
                     <option value={ownerId} >{ownerName} workspace</option>
                 ))}
