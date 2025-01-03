@@ -16,7 +16,7 @@ export const getFolderListAPI = async (id) => {
 
 export const createNewFolderAPI = async (data) => {
     try {
-        return await axios.post(`${API_URL}/api/create/folder`, data, { headers })
+        return await axios.post(`${API_URL}/api/create/folder`, data, { headers: getHeaders() })
     } catch (error) {
        throw error;
     }
@@ -24,7 +24,7 @@ export const createNewFolderAPI = async (data) => {
 
 export const deleteFolderAPI = async (data) => {
     try {
-        return await axios.post(`${API_URL}/api/delete/folder`, data, { headers })
+        return await axios.post(`${API_URL}/api/delete/folder`, data, { headers: getHeaders() })
     } catch (error) {
        throw error;
     }
@@ -32,7 +32,7 @@ export const deleteFolderAPI = async (data) => {
 
 export const createNewFormAPI = async (data) => {
     try {
-        return await axios.post(`${API_URL}/api/create/new-form`, data, { headers })
+        return await axios.post(`${API_URL}/api/create/new-form`, data, { headers: getHeaders() })
     } catch (error) {
        throw error;
     }
@@ -40,7 +40,7 @@ export const createNewFormAPI = async (data) => {
 
 export const deleteFormAPI = async (data) => {
     try {
-        return await axios.post(`${API_URL}/api/delete/form`, data, { headers })
+        return await axios.post(`${API_URL}/api/delete/form`, data, { headers: getHeaders() })
     } catch (error) {
        throw error;
     }
@@ -48,7 +48,7 @@ export const deleteFormAPI = async (data) => {
 
 export const allWorkspaceAPI = async (id) => {
     try {
-        return await axios.get(`${API_URL}/api/all-workspace?ownerId=${id}`, { headers })
+        return await axios.get(`${API_URL}/api/all-workspace?ownerId=${id}`, { headers: getHeaders() })
     } catch (error) {
        throw error;
     }
@@ -56,7 +56,7 @@ export const allWorkspaceAPI = async (id) => {
 
 export const shareWorkspaceAPI = async (data) => {
     try {
-        return await axios.post(`${API_URL}/api/share-url`, data, { headers })
+        return await axios.post(`${API_URL}/api/share-url`, data, { headers: getHeaders() })
     } catch (error) {
        throw error;
     }
