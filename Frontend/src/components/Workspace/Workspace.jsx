@@ -13,6 +13,7 @@ import { ToastContainer, toast } from 'react-toastify';
 
 
 import './Workspace.scss'
+import Loader from '../Common/Loader/Loader';
 
 const Workspace = () => {
     const [formElements, setFormElements] = useState([]);
@@ -20,6 +21,7 @@ const Workspace = () => {
     const [showError, setShowError] = useState(false);
     const [disableSaveBtn, setDisableShareBtn] = useState(false);
     const [formBotId, setFormBotId] = useState('')
+    const [isLoading, setIsLoading] = useState(false)
     const [theme] = useTheme();
     const params = useParams();
     const userData = useUserData();
@@ -119,6 +121,7 @@ const Workspace = () => {
             formName
         };
         try {
+            setIsLoading(true)
             res = await createFormWorkspaceAPI(payload);
             if (res.status == 200 && res.data.message === 'success') {
                 setDisableShareBtn(true); //enable share button when data form bot is successfully saved
@@ -128,12 +131,15 @@ const Workspace = () => {
         } catch (error) {
             console.log(error);
             toast.error(res?.data?.message || 'Something went wrong!')
+        } finally {
+            setIsLoading(false)
         }
     }
 
     const fetchFormBot = async () => {
         let res;
         try {
+            setIsLoading(true)
             res = await fetchFormWorkspaceAPI({ folderId: params.folderId, formId: params.formId, ownerId: params.ownerId })
             if (res?.data?.data?.elements?.length) {
                 setDisableShareBtn(true); //enable share button when data form bot api returns elements array
@@ -150,6 +156,8 @@ const Workspace = () => {
         } catch (error) {
             toast.error(res?.data?.message || 'Something went wrong!')
             console.log("🚀 ~ fetchFormBot ~ error:", error)
+        } finally {
+            setIsLoading(false)
         }
     }
 
@@ -206,6 +214,7 @@ const Workspace = () => {
                 pauseOnHover={false}
                 theme={isLightMode ? 'light' : 'dark'}
             />
+            { isLoading && <Loader theme={theme} /> }
         </div>
     )
 }

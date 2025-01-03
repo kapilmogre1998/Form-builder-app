@@ -9,10 +9,10 @@ import useUserData from '../../hooks/useUserData'
 import { deleteFolderAPI, createNewFolderAPI, createNewFormAPI, getFolderListAPI, deleteFormAPI, shareWorkspaceAPI } from './api'
 import useTheme from '../../hooks/useTheme'
 import { LIGHT } from '../../constant'
-
+import Loader from '../Common/Loader/Loader';
+import useWorkspaceData from '../../hooks/useWorkspaceData';
 
 import './FormDashboard.scss'
-import Loader from '../Common/Loader/Loader';
 
 const DEFAULT_FOLDER = { title: 'Create Folder', id: '1', uniqueId: 'CREATE_FOLDER' }
 const DEFAULT_FORM = { title: 'Create typebot', id: '1', uniqueId: 'CRREATE_TYPEBOT' }
@@ -25,23 +25,23 @@ const FormDashboard = () => {
   const [defaultFormList, setDefaultFormList] = useState([]);
   const [folderName, setFolderName] = useState({ name: '', isError: false, errorMsg: '' });
   const [formName, setFormName] = useState({ name: '', isError: false, errorMsg: '' });
-  const [sharePermission, setSharePermission] = useState({
-    permission: 'edit',
-    emailId: ''
-  });
+  const [sharePermission, setSharePermission] = useState({ permission: 'edit', emailId: '' });
+  const [isLoading, setIsLoading] = useState(false)
+  const [emailError, setEmailError] = useState({ isError: false, msg: '' });
+  const workspaceData = useWorkspaceData();
 
   const [theme] = useTheme();
   const navigate = useNavigate();
   const isLightMode = theme == LIGHT;
-  const [isLoading,setIsLoading]=useState(false)
-  const [emailError, setEmailError] = useState({ isError: false, msg: '' });
 
   const userData = useUserData();
 
-  const fetchFolderList = async (id) => {
+  const USER_ID = workspaceData?.ownerId || userData?.userId
+
+  const fetchFolderList = async (value) => {
     try {
-      setIsLoading(true)
-      const res = await getFolderListAPI(id || userData.userId);
+      setIsLoading(true);
+      const res = await getFolderListAPI(value || USER_ID);
       if (res?.data?.data?.folders) {
         const prevActiveFolderId = folderList.find(folder => folder.isActive)?.id;
 
@@ -69,11 +69,11 @@ const FormDashboard = () => {
       } else {
         setFolderList([]);
         setAllFormList([]);
-        setDefaultFormList([]); 
+        setDefaultFormList([]);
       }
     } catch (error) {
       console.log(error);
-    } finally{
+    } finally {
       setIsLoading(false)
     }
   }
@@ -99,9 +99,10 @@ const FormDashboard = () => {
   const createNewFolder = async () => {
     try {
       const payload = {
-        userId: userData.userId,
+        userId: USER_ID,
         folderName: folderName.name.trim()
       }
+      setIsLoading(true)
       const res = await createNewFolderAPI(payload);
 
       if (res.data.message === 'Folder already exists') {
@@ -112,6 +113,8 @@ const FormDashboard = () => {
       }
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -119,9 +122,10 @@ const FormDashboard = () => {
     try {
       const payload = {
         name: formName.name,
-        userId: userData.userId,
+        userId: USER_ID,
         folderId: modal?.modalData?.folderId || folderList.find(folder => folder.isActive)?.id || defaultFormList[0]?.folderId
       }
+      setIsLoading(true)
       const res = await createNewFormAPI(payload);
 
       if (res.data.message === 'Form name already exists') {
@@ -131,7 +135,9 @@ const FormDashboard = () => {
         closeModal();
       }
     } catch (error) {
-      console.log(error);
+      toast.error("Something went wrong");
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -166,7 +172,7 @@ const FormDashboard = () => {
     try {
       const data = {
         folderId: modal.modalData.folderId,
-        userId: userData.userId
+        userId: USER_ID
       }
 
       const res = await deleteFolderAPI(data);
@@ -184,7 +190,7 @@ const FormDashboard = () => {
     try {
       const data = {
         folderId: modal.modalData.folderId,
-        userId: userData.userId,
+        userId: USER_ID,
         formId: modal.modalData.formId
       }
 
@@ -209,10 +215,10 @@ const FormDashboard = () => {
 
   const handleCopyClick = async () => {
     try {
-        await navigator.clipboard.writeText(`${window.location.origin}/form-dashboard?ownerId=${userData.userId}&ownerName=${userData.userName}`);
-        toast.success('Copied to clipboard!');
+      await navigator.clipboard.writeText(`${window.location.origin}/form-dashboard?ownerId=${USER_ID}&ownerName=${userData.userName}`);
+      toast.success('Copied to clipboard!');
     } catch (err) {
-        console.error('Failed to copy: ', err);
+      console.error('Failed to copy: ', err);
     }
   };
 
@@ -226,9 +232,9 @@ const FormDashboard = () => {
         "permission": sharePermission.permission
       }
       res = await shareWorkspaceAPI(payload);
-      
-      if(res.data.sts == 1){
-        if(copyLink){
+
+      if (res.data.sts == 1) {
+        if (copyLink) {
           await handleCopyClick();
         } else {
           toast.success(res.data.message);
@@ -240,16 +246,16 @@ const FormDashboard = () => {
   }
 
   const handleClickOnSendInvite = async () => {
-    if(!sharePermission.emailId.length){
+    if (!sharePermission.emailId.length) {
       return setEmailError({ isError: true, msg: 'email cannot be empty.' })
     }
-    if(!validateEmail(sharePermission.emailId)){
+    if (!validateEmail(sharePermission.emailId)) {
       return setEmailError({ isError: true, msg: 'enter valid emailId.' })
     }
-    if(sharePermission.emailId == userData.email){
+    if (sharePermission.emailId == userData.email) {
       return setEmailError({ isError: true, msg: 'you can not send invite to yourself.' })
     }
-    
+
     shareWorkspace();
   }
 
@@ -303,7 +309,7 @@ const FormDashboard = () => {
           </div>
           {
             (activeFormList == null ? defaultFormList : activeFormList).map(({ title, id, folderId }) => (
-              <div key={id} className={`form ${isLightMode ? 'form-light-mode' : ''}`} onClick={() => navigate(`/workspace/${userData.userId}/${folderId}/${id}?formname=${encodeURI(title)}`)} >
+              <div key={id} className={`form ${isLightMode ? 'form-light-mode' : ''}`} onClick={() => navigate(`/workspace/${USER_ID}/${folderId}/${id}?formname=${encodeURI(title)}`)} >
                 <div>{title}</div>
                 <div className='form-delete-icon' onClick={(e) => handleClickonDeleteForm(e, { folderId, formId: id })} ><RiDeleteBin6Line className='delete' /></div>
               </div>
@@ -344,19 +350,19 @@ const FormDashboard = () => {
           </Modal>
         ) : null
       }
-       {
+      {
         modal?.type === 'SHARE' && modal?.show ? (
           <Modal contentWidth='550' closeModal={() => {
-              setModal({ ...modal, show: false })
-              setSharePermission({ permission: 'edit', emailId: '' });
-              setEmailError({ isError: false, msg: '' })
-            }}
+            setModal({ ...modal, show: false })
+            setSharePermission({ permission: 'edit', emailId: '' });
+            setEmailError({ isError: false, msg: '' })
+          }}
           >
             <div className='share-modal' >
               <div className='title-permission' >
                 <h3>Invite by Email</h3>
                 <div>
-                  <select name="permission" id="permission" onClick={(e) => setSharePermission(prev => ({ ...prev, permission: e.target.value }))} >
+                  <select name="permission" id="permission" className={`${theme == 'light' ? 'light-mode-share-permission' : ''}`} onClick={(e) => setSharePermission(prev => ({ ...prev, permission: e.target.value }))} >
                     <option value="Edit">Edit</option>
                     <option value="View">View</option>
                   </select>
@@ -364,9 +370,9 @@ const FormDashboard = () => {
               </div>
 
               <input type="text" className={`input-mail ${isLightMode ? 'light-mode-grey-theme' : ''}`} placeholder='Enter email id' onChange={(e) => {
-                  setEmailError({ isError: false, msg: '' });
-                  setSharePermission(prev => ({ ...prev, emailId: e.target.value }))
-                }} />
+                setEmailError({ isError: false, msg: '' });
+                setSharePermission(prev => ({ ...prev, emailId: e.target.value }))
+              }} />
               <div className='error-msg' >
                 {emailError.isError && emailError.msg ? emailError.msg : ''}
               </div>
@@ -378,16 +384,16 @@ const FormDashboard = () => {
           </Modal>
         ) : null
       }
-        <ToastContainer position="top-right"
-                autoClose={1500}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick={false}
-                rtl={false}
-                pauseOnHover={false}
-                theme={theme === LIGHT ? 'light' : 'dark'}
-            />
-            {isLoading && <Loader theme={theme} />}
+      <ToastContainer position="top-right"
+        autoClose={1500}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnHover={false}
+        theme={theme === LIGHT ? 'light' : 'dark'}
+      />
+      {isLoading && <Loader theme={theme} />}
     </div>
   )
 }

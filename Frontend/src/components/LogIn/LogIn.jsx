@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import traingleShape from '../../assets/login-traingle-shape.png'
 import semicircle from '../../assets/semi-circle.png'
 import semicircle2 from '../../assets/semi-circle-2.png'
+import { ToastContainer, toast } from 'react-toastify';
 import { loginAPI } from './api';
 
 import './LogIn.scss';
@@ -16,8 +17,9 @@ const LogIn = () => {
 
     const submitHandler = async (data) => {
         setIsLoading(true);
+        let res;
         try {
-            const res = await loginAPI(data);
+            res = await loginAPI(data);
 
             if (res?.data) {
                 localStorage.setItem("token", res.data.token);
@@ -27,7 +29,7 @@ const LogIn = () => {
                 throw new Error(res.data.msg)
             }
         } catch (error) {
-            alert(error.response.data.msg);
+            toast.error(error?.response?.data?.msg)
         } finally {
             setIsLoading(false);
         }
@@ -118,6 +120,15 @@ const LogIn = () => {
                     </form>
                 </div>
             </div>
+            <ToastContainer position="top-right"
+                autoClose={1500}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick={false}
+                rtl={false}
+                pauseOnHover={false}
+                theme={'dark'}
+            />
         </div>
     );
 };

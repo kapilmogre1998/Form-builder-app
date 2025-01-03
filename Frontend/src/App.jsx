@@ -10,7 +10,7 @@ import Analytics from "./components/Analytics/Analytics";
 
 import './App.css';
 function App() {
-  // https://iili.io/2e4fj29.png
+  
   return (
     <BrowserRouter>
       <Routes>
