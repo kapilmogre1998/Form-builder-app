@@ -1,5 +1,5 @@
 
-export const API_URL = "http://localhost:9000";
+export const API_URL = "https://deploy-backend-zi50.onrender.com";
 export const LIGHT = 'light'
 export const DARK = 'dark'
 
