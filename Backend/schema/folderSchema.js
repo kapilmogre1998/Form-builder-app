@@ -5,8 +5,7 @@ const folderSchema = new Schema({
     folders: [{
         folderName: {
             type: String,
-            required: true,
-            unique: true
+            required: true
         },
         forms: [{
             formName: {
