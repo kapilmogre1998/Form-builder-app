@@ -2,7 +2,7 @@ import axios from 'axios'
 import { API_URL } from '../../constant'
 
 const getHeaders = () => ({
-    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+    'Authorization': `${localStorage.getItem('token')}`,
     'Content-Type': 'application/json'
   });
 
