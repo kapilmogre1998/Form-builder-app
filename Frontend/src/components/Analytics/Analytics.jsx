@@ -103,7 +103,7 @@ const Analytics = () => {
                                 }
                                 data={[
                                     { title: `${((+data.submittedCount)/(+data.viewCount)*100).toFixed(2)}% completed`, value: +data?.submittedCount, color: '#3B82F6' },
-                                    { title: '', value: +data?.viewCount,color: '#909090' }
+                                    { title: '', value: (+data?.viewCount - +data?.submittedCount),color: '#909090' }
                                 ]}
                                 lineWidth='20'
                                 startAngle={-80}
