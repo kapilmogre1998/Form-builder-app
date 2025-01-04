@@ -15,7 +15,7 @@ router.get('/get/form-bot/:formBotId', async (req, res) => {
         const form = await Form.findById(formBotId);
 
         if (!form) {
-            return res.status(400).send("No such form exists");
+            return res.status(400).send({message: "No such form exists"});
         }
 
         return res.status(200).json({ data: form.elements, message: 'success' });
@@ -52,7 +52,7 @@ router.post('/view/count', async (req, res) => {
         let formbot = '';
 
         if (!formBotId) {
-            return res.status(400).send("Please provide a valid form bot id");
+            return res.status(400).send({message: "Please provide a valid form bot id"});
         }
 
         formbot = await FormBot.findOne({formBotId});
@@ -82,7 +82,7 @@ router.post('/form/start-count', async (req, res) => {
         let lastElementId = '';
 
         if (!formBotId) {
-            return res.status(400).send("Please provide a valid form bot id");
+            return res.status(400).send({message: "Please provide a valid form bot id"});
         }
 
         formbot = await FormBot.findOne({formBotId});

@@ -10,7 +10,6 @@ import { deleteFolderAPI, createNewFolderAPI, createNewFormAPI, getFolderListAPI
 import useTheme from '../../hooks/useTheme'
 import { LIGHT } from '../../constant'
 import Loader from '../Common/Loader/Loader';
-import useWorkspaceData from '../../hooks/useWorkspaceData';
 
 import './FormDashboard.scss'
 
@@ -28,7 +27,7 @@ const FormDashboard = () => {
   const [sharePermission, setSharePermission] = useState({ permission: 'edit', emailId: '' });
   const [isLoading, setIsLoading] = useState(false)
   const [emailError, setEmailError] = useState({ isError: false, msg: '' });
-  const workspaceData = useWorkspaceData();
+  const [workspaceData, setWorkspaceData] = useState(null);
 
   const [theme] = useTheme();
   const navigate = useNavigate();
@@ -39,9 +38,10 @@ const FormDashboard = () => {
   const USER_ID = workspaceData?.ownerId || userData?.userId
 
   const fetchFolderList = async (value) => {
+    let res;
     try {
       setIsLoading(true);
-      const res = await getFolderListAPI(value || USER_ID);
+      res = await getFolderListAPI(value || USER_ID);
       if (res?.data?.data?.folders) {
         const prevActiveFolderId = folderList.find(folder => folder.isActive)?.id;
 
@@ -72,7 +72,7 @@ const FormDashboard = () => {
         setDefaultFormList([]);
       }
     } catch (error) {
-      console.log(error);
+      toast.error(error?.response?.data?.message || 'something went wrong')
     } finally {
       setIsLoading(false)
     }
@@ -215,7 +215,7 @@ const FormDashboard = () => {
 
   const handleCopyClick = async () => {
     try {
-      await navigator.clipboard.writeText(`${window.location.origin}/form-dashboard?ownerId=${USER_ID}&ownerName=${userData.userName}`);
+      await navigator.clipboard.writeText(`${window.location.origin}/form-dashboard?ownerId=${USER_ID}&ownerName=${userData.userName}&permission=${sharePermission?.permission}`);
       toast.success('Copied to clipboard!');
     } catch (err) {
       console.error('Failed to copy: ', err);
@@ -231,6 +231,7 @@ const FormDashboard = () => {
         "ownerName": userData.userName,
         "permission": sharePermission.permission
       }
+      setIsLoading(true);
       res = await shareWorkspaceAPI(payload);
 
       if (res.data.sts == 1) {
@@ -242,6 +243,8 @@ const FormDashboard = () => {
       }
     } catch (error) {
       setEmailError({ isError: true, msg: error.response.data.message });
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -261,11 +264,11 @@ const FormDashboard = () => {
 
   const handleClickOnCopyLink = () => shareWorkspace('COPY_LINK');
 
-  useEffect(() => {
-    if (userData?.userId) {
-      fetchFolderList();
-    }
-  }, [userData?.userId])
+  // useEffect(() => {
+  //   if (userData?.userId) {
+  //     fetchFolderList();
+  //   }
+  // }, [userData?.userId])
 
   useEffect(() => {
     const activeFolderId = folderList.find(folder => folder.isActive)?.id;
@@ -281,37 +284,62 @@ const FormDashboard = () => {
     }
   }, [])
 
+  useEffect(() => {
+    const queryParams = new URLSearchParams(window.location.search)
+
+    const workspaceOwnerId = queryParams.get('ownerId');
+    const workspaceOwnerName = queryParams.get('ownerName');
+    const workspacePermission = queryParams.get('permission');
+
+    
+    if (userData?.userId) {
+      if(workspaceOwnerId && workspaceOwnerName && workspacePermission){
+        setWorkspaceData({ ownerId: workspaceOwnerId, ownerName: workspaceOwnerName, permission: workspacePermission })
+        fetchFolderList(workspaceOwnerId) //get Folder list if ownerId present in query params
+      } else {
+        fetchFolderList();
+      }
+    }
+
+  },[userData?.userId])
+
   return (
     <div className={`form-dashboard-container ${isLightMode ? "light-mode" : ""}`} >
       <header>
-        <FormDashboardHeader handleClickOnShare={() => setModal({ show: true, type: 'SHARE' })} fetchFolderList={fetchFolderList} />
+        <FormDashboardHeader handleClickOnShare={() => setModal({ show: true, type: 'SHARE' })} {...{setWorkspaceData, fetchFolderList, workspaceData}} />
       </header>
       <div className='create-folder-container' >
         <div className='folder-list' >
-          <span key={DEFAULT_FOLDER.id} className={`folder flex ${isLightMode ? 'form-dashboard-light-mode' : ''}`} onClick={() => setModal({ show: true, type: 'CREATE_FOLDER' })}>
+          { (workspaceData?.permission == 'edit' || workspaceData == null) ? <span key={DEFAULT_FOLDER.id} className={`folder flex ${isLightMode ? 'form-dashboard-light-mode' : ''}`} onClick={() => setModal({ show: true, type: 'CREATE_FOLDER' })}>
             <AiOutlineFolderAdd style={{ fontSize: '20px' }} />
             <span>{DEFAULT_FOLDER.title}</span>
-          </span>
+          </span> : null}
           {
             folderList.map(({ title, id, isActive }) => (
               <div key={id} className={`folder ${isActive ? isLightMode ? 'folder-active-light-mode' : 'active' : ''} ${isLightMode ? 'form-dashboard-light-mode' : ''}`} onClick={(event) => handleClickOnFolder(event, id)} >
                 <div>{title}</div>
-                <RiDeleteBin6Line className='delete' onClick={(e) => handleClickonDeleteFolder(e, id)} />
+                {
+                  (workspaceData?.permission == 'edit' || workspaceData == null) ? 
+                  <RiDeleteBin6Line className='delete' onClick={(e) => handleClickonDeleteFolder(e, id)} /> : null
+                }
               </div>
             ))
           }
         </div>
 
         <div className='forms' >
-          <div key={DEFAULT_FORM.id} className={`form ${isLightMode ? 'form-dashboard-light-mode' : ''}`} onClick={() => setModal({ show: true, type: 'CREATE_FORM' })}>
+          {(workspaceData?.permission == 'edit' || workspaceData == null) ? <div key={DEFAULT_FORM.id} className={`add-form form ${isLightMode ? 'form-dashboard-light-mode' : ''}`} onClick={() => setModal({ show: true, type: 'CREATE_FORM' })}>
             <div className='plus-icon'>+</div>
             <div className='title-center' >{DEFAULT_FORM.title}</div>
-          </div>
+          </div> : null}
           {
             (activeFormList == null ? defaultFormList : activeFormList).map(({ title, id, folderId }) => (
-              <div key={id} className={`form ${isLightMode ? 'form-light-mode' : ''}`} onClick={() => navigate(`/workspace/${USER_ID}/${folderId}/${id}?formname=${encodeURI(title)}`)} >
+              <div key={id} className={`form ${isLightMode ? 'form-light-mode' : ''}`} onClick={() => navigate(`/workspace/${USER_ID}/${folderId}/${id}?formname=${encodeURI(title)}&permission=${workspaceData?.permission || ''}`)} >
                 <div>{title}</div>
-                <div className='form-delete-icon' onClick={(e) => handleClickonDeleteForm(e, { folderId, formId: id })} ><RiDeleteBin6Line className='delete' /></div>
+                {
+                  (workspaceData?.permission == 'edit' || workspaceData == null) ? 
+                  <div className='form-delete-icon' onClick={(e) => handleClickonDeleteForm(e, { folderId, formId: id })} ><RiDeleteBin6Line className='delete' /></div> : null
+                }
               </div>
             ))
           }
@@ -363,8 +391,8 @@ const FormDashboard = () => {
                 <h3>Invite by Email</h3>
                 <div>
                   <select name="permission" id="permission" className={`${theme == 'light' ? 'light-mode-share-permission' : ''}`} onClick={(e) => setSharePermission(prev => ({ ...prev, permission: e.target.value }))} >
-                    <option value="Edit">Edit</option>
-                    <option value="View">View</option>
+                    <option value="edit">Edit</option>
+                    <option value="view">View</option>
                   </select>
                 </div>
               </div>

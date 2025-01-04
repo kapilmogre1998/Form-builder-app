@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Folder = require('../schema/folderSchema');
 const User = require('../schema/userSchema');
+const Form = require('../schema/formSchema');
 const authenticateToken = require('../middleware/authenticateToken');
 
 router.get('/all/folders', authenticateToken, async (req, res) => {
@@ -138,7 +139,7 @@ router.post('/delete/form', authenticateToken, async (req, res) => {
         const folderList = await Folder.findOne({ owner: userId, 'folders._id': folderId });
 
         const folderExists = folderList.folders.find(f => f._id.toString() === folderId);
-
+        
         if (!folderExists) {
             return res.status(400).json({ message: `Folder doesn't exists.` })
         }
@@ -151,7 +152,14 @@ router.post('/delete/form', authenticateToken, async (req, res) => {
             folderList.folders = folderList.folders.filter(f => f._id.toString() !== folderId);
         }
 
-        // // Save the updated folder document
+        //Delete document from Form Collection
+        const form  = await Form.findOne({formId});
+        
+        if(form){
+            await form.deleteOne()
+        }
+        
+        // Save the updated folder document
         await folderList.save();
 
         res.status(200).send({ message: 'Form is deleted successfully' })

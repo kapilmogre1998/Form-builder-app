@@ -10,10 +10,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { createFormWorkspaceAPI, fetchFormWorkspaceAPI } from './api';
 import useUserData from '../../hooks/useUserData';
 import { ToastContainer, toast } from 'react-toastify';
-
+import Loader from '../Common/Loader/Loader';
 
 import './Workspace.scss'
-import Loader from '../Common/Loader/Loader';
 
 const Workspace = () => {
     const [formElements, setFormElements] = useState([]);
@@ -27,6 +26,8 @@ const Workspace = () => {
     const userData = useUserData();
     const isLightMode = theme === "light";
     const navigate = useNavigate();
+    const searchParams = new URLSearchParams(window.location.search);
+    const permission = searchParams.get('permission')
 
     const isSubmitButtonAdded = useMemo(() => {
         return formElements.find((elem) => elem.elementType == 'user-input-button')?.value?.length ? true : false;
@@ -51,6 +52,8 @@ const Workspace = () => {
     };
 
     const handleClickOnBubbleText = (e) => {
+        if(permission == 'view') return;
+
         const bubbleInputType = e.target.id.split('-'); //spliting elementId to get the element name and title
         let title = ''; //variable for storing the title of the input field
         if (isSubmitButtonAdded) {
@@ -117,7 +120,7 @@ const Workspace = () => {
             list: modifiedFormElements,
             folderId: params.folderId,
             formId: params.formId,
-            userId: userData.userId,
+            userId: params.ownerId || userData.userId,
             formName
         };
         try {
@@ -130,7 +133,7 @@ const Workspace = () => {
             }
         } catch (error) {
             console.log(error);
-            toast.error(res?.data?.message || 'Something went wrong!')
+            toast.error(error?.response?.data?.message || 'Something went wrong!')
         } finally {
             setIsLoading(false)
         }
@@ -154,7 +157,7 @@ const Workspace = () => {
                 setFormBotId(res.data.data.formBotId);
             }
         } catch (error) {
-            toast.error(res?.data?.message || 'Something went wrong!')
+            toast.error(error?.response?.data?.message || 'Something went wrong!')
             console.log("🚀 ~ fetchFormBot ~ error:", error)
         } finally {
             setIsLoading(false)
@@ -166,7 +169,6 @@ const Workspace = () => {
             fetchFormBot();
         }
     }, [userData?.userId])
-
 
     return (
         <div className={`workspace-container ${isLightMode ? "light-mode" : ""}`} >
@@ -184,20 +186,21 @@ const Workspace = () => {
 
                         <div className='form-elements' >
                             {
-                                formElements.map(({ elementType, value, title, id }, index) => (
+                                formElements.map(({ elementType, value, title, id }, index, arr) => (
                                     <div key={id} className={`element ${isLightMode ? 'light-mode-theme light-mode-border' : ''}`} >
                                         <p>{title}</p>
-                                        {[...BUBBLE_TYPES, 'user-input-button'].includes(elementType) ? <input className={`${isLightMode ? 'light-mode-theme light-mode-border' : ''}`} type='text' placeholder='Enter text here...' value={value} onChange={(e) => handleOnChange(id, e)} /> : ''}
+                                        {[...BUBBLE_TYPES, 'user-input-button'].includes(elementType) ? <input disabled={index !== arr.length - 1} className={`${isLightMode ? 'light-mode-theme light-mode-border' : ''}`} type='text' placeholder='Enter text here...' value={value} onChange={(e) => handleOnChange(id, e)} /> : ''}
                                         <p className='error-msg' >{showError && (index == formElements.length - 1) ? 'Field is required!' : ''}</p>
-                                        <div className={`delete-btn ${isLightMode ? 'light-mode-theme light-mode-border' : ''}`} >
+                                        {(permission !== 'view') ? <div className={`delete-btn ${isLightMode ? 'light-mode-theme light-mode-border' : ''}`} >
                                             <RiDeleteBin6Line className='delete-icon' onClick={() => {
                                                 if(disableSaveBtn) {
                                                    return toast.error(`Once it is saved you can't edit`)
                                                 }
+                                                setShowError(false);
                                                 handleClickOnDelete(id)
                                             }}
                                              />
-                                        </div>
+                                        </div> : null}
                                     </div>
                                 ))
                             }

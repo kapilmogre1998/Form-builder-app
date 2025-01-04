@@ -11,7 +11,6 @@ const folderSchema = new Schema({
             formName: {
                 type: String,
                 required: true,
-                unique: true
             },
             owner: {
                 type: Schema.Types.ObjectId,

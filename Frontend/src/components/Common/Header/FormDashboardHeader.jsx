@@ -9,24 +9,22 @@ import { ToastContainer, toast } from 'react-toastify';
 import Loader from '../Loader/Loader'
 
 import './FormDashboardHeader.scss'
-import useWorkspaceData from '../../../hooks/useWorkspaceData'
 
-const FormDashboardHeader = ({ handleClickOnShare, fetchFolderList }) => {
+const FormDashboardHeader = ({ handleClickOnShare, fetchFolderList, setWorkspaceData, workspaceData }) => {
     const [theme, toggleTheme] = useTheme();
     const [selectOptions, setSelectOptions] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
     const userData = useUserData();
-    const workspaceData = useWorkspaceData();
 
-    const handleClick = (e) => {
+    const handleOnChange = (e) => {
         const {value} = e.target;
 
         if(value !== 'settings') {
             if(value !== userData?.userId){
-                localStorage.setItem('another_user_workspace_data', JSON.stringify(selectOptions.find((item)=> item.ownerId === value)));
+                setWorkspaceData(selectOptions.find((item)=> item.ownerId === value));
             } else {
-                localStorage.removeItem('another_user_workspace_data')
+                setWorkspaceData(null);
             }
             fetchFolderList(value);
         } else if(value === 'settings'){
@@ -64,10 +62,10 @@ const FormDashboardHeader = ({ handleClickOnShare, fetchFolderList }) => {
 
     return (
         <div className={`header-container ${theme === LIGHT ? 'light-header': ''}`} >
-            <select id="workspace" name="workspace" onClick={handleClick} >
-                <option value={userData?.userId} defaultValue>{userData?.userName} workspace</option>
-                {selectOptions?.map(({ownerId, ownerName}) => (
-                    <option value={ownerId} >{ownerName} workspace</option>
+            <select id="workspace" name="workspace" onChange={handleOnChange} value={workspaceData?.ownerId || userData?.userId} >
+                <option value={userData?.userId}>{userData?.userName} workspace</option>
+                {selectOptions?.map(({ownerId, ownerName}, index) => (
+                    <option key={index} value={ownerId} >{ownerName} workspace</option>
                 ))}
                 <option value="settings" >Settings</option>
             </select>

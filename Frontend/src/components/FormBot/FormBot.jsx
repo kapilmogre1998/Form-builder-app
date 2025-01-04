@@ -4,16 +4,20 @@ import { ToastContainer, toast } from 'react-toastify';
 import { BUBBLE_TYPES, formatName, USER_INPUT } from '../../constant';
 import { RiSendPlane2Line } from "react-icons/ri";
 import { addViewCountAPI, getFormBotAPI, startViewCountAPI, submitFormBotAPI } from './api';
+import Loader from '../Common/Loader/Loader';
+import useTheme from '../../hooks/useTheme';
 
 import './FormBot.scss';
 
 const FormBot = () => {
   const [chatBot, setChatBot] = useState([]);
   const [data, setData] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
   const params = useParams();
   const [inputValue, setInputValue] = useState('');
   const formBotId = params.formBotId;
   const formDataId = useRef(null);
+  const [theme] = useTheme();
 
   const appendElementsIntoChatBotList = () => {
     let allBubblesBeforeInput = [];
@@ -45,13 +49,17 @@ const FormBot = () => {
     if (!formBotId) return;
 
     let res;
+    setIsLoading(true)
     try {
       res = await getFormBotAPI(formBotId);
       if (res?.data?.message === 'success') {
+        addViewCount();
         setData(res.data.data.map(({ title, type, value }) => ({ title, type, value})));
       }
     } catch (error) {
-      toast.error(res?.data?.message || 'something went wrong')
+      toast.error(error?.response?.data?.message || 'something went wrong')
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -104,7 +112,7 @@ const FormBot = () => {
     chatBot.map(item => item.type)
     appendElementsIntoChatBotList();
     
-    //If startCountAPI is false it means it is the first input box and we need to call the API.
+    //If isFirstUserInputFieldPresent is true it means it is the first input box, so i need to call the start count API.
     if(isFirstUserInputFieldPresent && inputValue.length){
       const payload = chatBot.map((item, index) => {
         if(index == chatBot.length - 1){
@@ -138,12 +146,15 @@ const FormBot = () => {
   const formStartCount = async (data) => {
     let res;
     try {
+      setIsLoading(true)
       res = await startViewCountAPI({ formBotId, elements: data });
       if (res.data.sts == 1 && res.data.formDataId) {
         formDataId.current = res.data.formDataId;
        }
     } catch (error) {
-      toast.error(res?.data?.message || 'something went wrong')
+      toast.error(error?.response?.data?.message || 'something went wrong')
+    } finally{
+      setIsLoading(false)
     }
   }
 
@@ -155,12 +166,15 @@ const FormBot = () => {
         elements: chatBot,
         formDataId: formDataId.current
       }
+      setIsLoading(true)
       res = await submitFormBotAPI(payload);
       if (res.status == 200) {
         toast.success(res.data.message)
       }
     } catch (error) {
-      toast.error(res?.data?.message || 'something went wrong')
+      toast.error(error?.response?.data?.message || 'something went wrong')
+    } finally {
+      setIsLoading(false);
     }
   }
 
@@ -170,13 +184,12 @@ const FormBot = () => {
       res = await addViewCountAPI({ formBotId });
       if (res.data.sts == 1) { }
     } catch (error) {
-      toast.error(res?.data?.message || 'something went wrong')
+      toast.error(error?.response?.data?.message || 'something went wrong')
     }
   }
 
   useEffect(() => {
     fetchFormBot();
-    addViewCount();
   }, [])
 
   useEffect(() => {
@@ -205,6 +218,7 @@ const FormBot = () => {
         pauseOnHover={false}
         theme={'dark'}
       />
+      {isLoading && <Loader theme={theme} />}
     </div>
   )
 }

@@ -58,10 +58,10 @@ router.get('/get/form-workspace', authenticateToken, async(req, res) => {
 
         const folderList = await Folder.findOne({ owner: ownerId, 'folders._id': folderId });
 
-        const existingFolder = folderList.folders.find(f => f._id.toString() === folderId);
+        const existingFolder = folderList?.folders?.find(f => f._id.toString() === folderId);
 
         if (!existingFolder) {
-            return res.status(404).json({ message: 'Folder not found' });
+            return res.status(400).json({ message: 'Folder not found' });
         }
 
         const form = await  Form.findOne({ formId });
