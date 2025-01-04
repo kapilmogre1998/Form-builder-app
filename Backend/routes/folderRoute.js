@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Folder = require('../schema/folderSchema');
+const User = require('../schema/userSchema');
 const authenticateToken = require('../middleware/authenticateToken');
 
 router.get('/all/folders', authenticateToken, async (req, res) => {
@@ -8,8 +9,13 @@ router.get('/all/folders', authenticateToken, async (req, res) => {
         const userId = req.query.id;
 
         if (!userId) {
-            console.log(userId);
             return res.status(400).json('UserId is not present.')
+        }
+
+        const userExists = await User.findById(userId);
+
+        if(!userExists){
+            return res.status(400).json({ message: 'You are not authorized.' })
         }
 
         const folderList = await Folder.findOne({ owner: userId })
@@ -83,6 +89,7 @@ router.post('/create/new-form', authenticateToken, async (req, res) => {
     try {
         if (folderId) {
             const folder = await Folder.findOne({ owner: userId, 'folders._id': folderId });
+            console.log("🚀 ~ router.post ~ folder:", folder)
 
             if (!folder) {
                 return res.status(400).json({ message: 'Folder does not exist.' });

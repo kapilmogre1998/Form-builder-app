@@ -93,9 +93,11 @@ router.get('/all-workspace', authenticateToken, async (req, res) => {
             const isOwnerIdPresentInWorkspace = workspace.accessSettings.find(elem => elem.userId.toString() === ownerId);
             
             if(isOwnerIdPresentInWorkspace) {
+                
                 allWorkspaceOwnerData.push({
                     ownerId: workspace.ownerId,
-                    ownerName: workspace.ownerName
+                    ownerName: workspace.ownerName,
+                    permission: workspace.accessSettings[0].permission
                 })
             }
         })
